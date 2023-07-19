@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">bus locator system</string>
+    <string name="select_route_prompt">Select Route</string>
+    <string name="title_activity_maps">MapsActivity</string>
+    <string name="title_activity_passenger_map">PassengerMapActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="google_maps_key">AIzaSyCuBp-Fnefr1Xe5RxLgxMh3D2OzOQzxyaE</string>
+
+</resources>

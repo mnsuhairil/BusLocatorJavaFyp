@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.BusLocatorSystem"
+        tools:targetApi="31">
+        <activity
+            android:name=".BusStopFinderActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PassengerProfileActivity"
+            android:exported="false" /> <!-- Google Maps API Key -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCuBp-Fnefr1Xe5RxLgxMh3D2OzOQzxyaE" /> <!-- MapView Configuration -->
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" /> <!-- MapView Activity -->
+        <activity
+            android:name=".PassengerMapActivity"
+            android:exported="false"
+            android:label="@string/title_activity_passenger_map">
+
+            <!-- Enable hardware acceleration for smoother map rendering -->
+            <meta-data
+                android:name="android.hardware.accelerated_composer"
+                android:value="true" />
+        </activity> <!-- Other Activities -->
+        <activity
+            android:name=".DriverProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DriverMapsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_maps" />
+        <activity
+            android:name=".SignUpActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RetrieveDriverActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DeleteDriverActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UpdateDriverActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RegisterDriverActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PassengerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DriverActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminPanelActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SignInActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

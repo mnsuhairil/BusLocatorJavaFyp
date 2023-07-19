@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="24dp"
+    android:paddingBottom="24dp">
+
+    <EditText
+        android:id="@+id/editTextDriverName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Driver Name"
+        android:inputType="textPersonName"
+        android:maxLines="1"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/editTextDriverBusId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Driver Bus ID"
+        android:inputType="number"
+        android:maxLines="1"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/editTextDriverPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Driver Password"
+        android:inputType="textPassword"
+        android:maxLines="1"
+        android:layout_marginBottom="16dp" />
+
+    <Spinner
+        android:id="@+id/spinnerDriverRoute"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/route_array"
+        android:prompt="@string/select_route_prompt"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/btnRegisterDriver"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Register Driver" />
+
+</LinearLayout>

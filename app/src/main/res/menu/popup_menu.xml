@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/kota_kinabalu"
+        android:title="Kota Kinabalu"
+        />
+    <item
+        android:id="@+id/putatan"
+        android:title="Putatan"
+        />
+    <item
+        android:id="@+id/kinarut"
+        android:title="Kinarut"
+        />
+    <item
+        android:id="@+id/penampang"
+        android:title="Penampang"
+        />
+
+
+
+</menu>

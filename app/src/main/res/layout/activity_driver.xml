@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    tools:context=".DriverActivity">
+<RelativeLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Update Bus Status"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"
+        android:id="@+id/textViewUpdateBusStatus"/>
+
+    <EditText
+        android:id="@+id/editTextTotalPassenger"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Total Passenger Count"
+        android:inputType="number"
+        android:layout_below="@id/textViewUpdateBusStatus"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/editTextBusOilStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Bus Oil Status"
+        android:layout_below="@id/editTextTotalPassenger"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnUpdateStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Update"
+        android:layout_below="@id/editTextBusOilStatus"
+        android:layout_marginBottom="16dp"/>
+</RelativeLayout>
+
+
+    <View
+        android:id="@+id/curvedView"
+        android:layout_width="match_parent"
+        android:layout_height="54dp"
+        android:layout_alignParentBottom="true"
+        android:elevation="8dp" />
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigationView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:menu="@menu/bottom_navigation_menu" />
+
+</RelativeLayout>
+

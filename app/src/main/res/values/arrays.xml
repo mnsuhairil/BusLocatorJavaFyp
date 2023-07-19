@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="route_array">
+        <item>Route 1</item>
+        <item>Route 2</item>
+        <item>Route 3</item>
+    </array>
+</resources>
