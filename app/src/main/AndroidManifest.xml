@@ -5,7 +5,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-feature android:name="android.hardware.sensor.accelerometer" />
+    <uses-feature android:name="android.hardware.sensor.compass" />
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -15,6 +18,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BusLocatorSystem"
         tools:targetApi="31">
+        <activity
+            android:name=".TransitionActivity"
+            android:theme="@style/Theme.BusLocatorSystemNoActionBar"
+            android:exported="false" />
         <activity
             android:name=".BusStopFinderActivity"
             android:exported="false" />
@@ -43,34 +50,40 @@
         <activity
             android:name=".DriverMapsActivity"
             android:exported="false"
-            android:label="@string/title_activity_maps" />
+            android:label="@string/title_activity_maps"
+            android:theme="@style/Theme.BusLocatorSystemNoActionBar"/>
         <activity
             android:name=".SignUpActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.BusLocatorSystemNoActionBar" />
         <activity
             android:name=".RetrieveDriverActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.BusLocatorSystemNoActionBar" />
         <activity
             android:name=".DeleteDriverActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.BusLocatorSystemNoActionBar" />
         <activity
             android:name=".UpdateDriverActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.BusLocatorSystemNoActionBar" />
         <activity
             android:name=".RegisterDriverActivity"
-            android:exported="false" />
-        <activity
-            android:name=".PassengerActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.BusLocatorSystemNoActionBar" />
         <activity
             android:name=".DriverActivity"
+            android:theme="@style/Theme.BusLocatorSystemNoActionBar"
             android:exported="false" />
         <activity
             android:name=".AdminPanelActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.BusLocatorSystemNoActionBar" />
         <activity
             android:name=".SignInActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.BusLocatorSystemNoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

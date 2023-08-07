@@ -2,13 +2,33 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/round_bg_spinner"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Update Driver Information"
+        android:gravity="center"
+        android:textSize="25sp"
+        android:layout_marginTop="10dp"
+        android:textStyle="bold"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayoutDriverName"
-        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        app:boxBackgroundColor="@color/quantum_grey400"
+        app:boxCornerRadiusTopStart="10dp"
+        app:boxCornerRadiusTopEnd="10dp"
+        app:boxCornerRadiusBottomStart="10dp"
+        app:boxCornerRadiusBottomEnd="10dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        app:hintEnabled="true"
         android:hint="Driver Name">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -20,9 +40,18 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayoutDriverBusId"
-        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        app:boxBackgroundColor="@color/quantum_grey400"
+        app:boxCornerRadiusTopStart="10dp"
+        app:boxCornerRadiusTopEnd="10dp"
+        app:boxCornerRadiusBottomStart="10dp"
+        app:boxCornerRadiusBottomEnd="10dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        app:hintEnabled="true"
         android:hint="Driver Bus ID">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -34,9 +63,17 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayoutDriverRoute"
-        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        app:boxCornerRadiusTopStart="10dp"
+        android:background="@color/white"
+        app:boxCornerRadiusTopEnd="10dp"
+        app:boxCornerRadiusBottomStart="10dp"
+        app:boxCornerRadiusBottomEnd="10dp"
         android:layout_width="match_parent"
-        android:layout_height="39dp"
+        android:layout_height="50dp"
         android:hint="Driver Route">
 
         <Spinner
@@ -51,7 +88,9 @@
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:layout_marginTop="16dp"
-        android:text="Update Driver" />
+        android:text="Update Driver"
+        android:textColor="@color/white" />
 
 </LinearLayout>

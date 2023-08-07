@@ -10,6 +10,15 @@ public class Driver {
     private int totalPassenger;
     private String busOilStatus;
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    private String imageUrl;
     private String password; // Add a password field
 
     public Driver() {

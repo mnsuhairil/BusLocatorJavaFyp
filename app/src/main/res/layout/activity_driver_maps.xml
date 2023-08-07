@@ -3,15 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".DriverMapsActivity">
-    <Button
-        android:id="@+id/selectLocationButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp"
-        android:text="Select Location" />
+
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
@@ -30,13 +24,40 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top|left"
-        android:background="#ffffff"
+        android:background="@color/transparent"
+        android:layout_marginTop="35dp"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="10dp">
 
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/selectLocationButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:visibility="visible"
+            app:lottie_autoPlay="true"
+            app:lottie_rawRes="@raw/pin"
+            app:lottie_loop="true"
+            app:lottie_scale="0.5"
+            app:lottie_speed="1.0"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_gravity="start"
+            tools:ignore="MissingConstraints" />
 
-
-
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/selectMapType"
+            android:layout_width="50dp"
+            android:layout_height="70dp"
+            android:scaleType="fitXY"
+            android:visibility="visible"
+            app:lottie_autoPlay="true"
+            app:lottie_rawRes="@raw/rootmap"
+            app:lottie_loop="true"
+            app:lottie_scale="0.5"
+            app:lottie_speed="1.0"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_gravity="start"
+            android:layout_marginBottom="16dp"
+            tools:ignore="MissingConstraints" />
         <!-- Add any additional views or buttons here -->
 
     </LinearLayout>

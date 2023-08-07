@@ -4,7 +4,6 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -24,14 +23,13 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,9 +40,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.FitCenter;
-import com.firebase.geofire.GeoLocation;
+import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -61,13 +57,11 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
@@ -89,31 +83,31 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import okio.Timeout;
 
 public class BusStopFinderActivity extends AppCompatActivity implements SensorEventListener, OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-    private ProgressBar progressBar,progressBar1;
+    private LottieAnimationView progressBar1;
+    private ProgressBar progressBar;
 
     private static final int PROGRESS_DELAY = 1000;
 
     private ProgressDialog progressDialog;
 
-    private GoogleMap mMap;
-    private FusedLocationProviderClient fusedLocationProviderClient;
-    private Location currentLocation;
+    private GoogleMap mMap1;
+    private FusedLocationProviderClient fusedLocationProviderClient1;
+    private Location currentLocation1;
+    private LinearLayout ETA;
     private OkHttpClient client;
     private Gson gson;
     private ValueAnimator arrowAnimator = null;
@@ -125,73 +119,78 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
     private int currentProgress = 0; // Current progress value
 
 
-    private Polyline currentPolyline;
-    private LatLng selectedBusStopLatLng;
-    private boolean isNavigationMode = false;
-    private Handler handler = new Handler(Looper.getMainLooper());
-    private LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
-    private List<Marker> busStopMarkers = new ArrayList<>();
-    private Marker selectedMarker;
+    private Polyline currentPolyline1;
+    private LatLng selectedBusStopLatLng1;
+    private boolean isNavigationMode1 = false;
+    private Handler handler1 = new Handler(Looper.getMainLooper());
+    private LatLngBounds.Builder boundsBuilder1 = new LatLngBounds.Builder();
+    private List<Marker> busStopMarkers1 = new ArrayList<>();
+    private Marker selectedMarker1;
     private int delay = 0;
 
 
     // Declare the LocationCallback and LocationRequest variables
-    private LocationCallback locationCallback;
-    private LocationRequest locationRequest;
+    private LocationCallback locationCallback1;
+    private LocationRequest locationRequest1;
 
-    private double currentLocationLatitude, currentLocationLongitude;
+    private double currentLocationLatitude1, currentLocationLongitude1;
     private String currentUid;
     private DatabaseReference mDatabase;
-    private String origin,destination;
+    private String origin1, destination1;
 
-    private LocationManager locationManager;
-    private static final long MIN_TIME_INTERVAL = 0; // Minimum time interval for location updates (in milliseconds)
-    private static final float MIN_DISTANCE = 0; // Minimum distance interval for location updates (in meters)
-    private boolean updateRoute = false;
-    private Button startNavigationButton;
+    private LocationManager locationManager1;
+    private static final long MIN_TIME_INTERVAL1 = 0; // Minimum time interval for location updates (in milliseconds)
+    private static final float MIN_DISTANCE1 = 0; // Minimum distance interval for location updates (in meters)
+    private boolean updateRoute1 = false;
+    private Button startNavigationButton1;
 
     // Declare variables for accelerometer and magnetometer data
-    private float[] accelerometerData;
-    private float[] magnetometerData;
-    private boolean busStopDataFetched = false;
-    private boolean isNotiAriveShowing = false;
+    private float[] accelerometerData1;
+    private float[] magnetometerData1;
+    private boolean busStopDataFetched1 = false;
+    private boolean isNotiAriveShowing1 = false;
+    private String menuMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bus_stop_finder);
 
+        menuMap = getIntent().getStringExtra("mapTypeSelected");
+
         progressBar1 = findViewById(R.id.progressBar);
+
+        ETA = findViewById(R.id.ETA);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         currentUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationManager1 = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
 
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationProviderClient1 = LocationServices.getFusedLocationProviderClient(this);
 
         // Create an instance of OkHttpClient and Gson
         client = new OkHttpClient();
         gson = new Gson();
 
         // Initialize the LocationCallback and LocationRequest
-        locationCallback = new LocationCallback() {
+        locationCallback1 = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 if (locationResult == null) {
                     return;
                 }
                 for (Location location : locationResult.getLocations()) {
-                    currentLocation = location;
-                    currentLocationLatitude = currentLocation.getLatitude();
-                    currentLocationLongitude = currentLocation.getLongitude();
-                    System.out.println("debug 5"+currentLocation);
-                    if (busStopMarkers.isEmpty()){
+                    currentLocation1 = location;
+                    currentLocationLatitude1 = currentLocation1.getLatitude();
+                    currentLocationLongitude1 = currentLocation1.getLongitude();
+                    System.out.println("debug 5"+ currentLocation1);
+                    if (busStopMarkers1.isEmpty()){
                         // Display all bus stop markers
                         displayAllBusStopMarkers();
 
@@ -199,19 +198,19 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
                         focusCameraOnCurrentLocation();
                     }
 
-                    if (!isNavigationMode) {
+                    if (!isNavigationMode1) {
                         focusCameraOnCurrentLocation();
                     }
 
                 }
-                if (isNavigationMode){
+                if (isNavigationMode1){
                     for (Location location : locationResult.getLocations()) {
                         LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                        LatLng busStopLocation = new LatLng(selectedBusStopLatLng.latitude, selectedBusStopLatLng.longitude);
+                        LatLng busStopLocation = new LatLng(selectedBusStopLatLng1.latitude, selectedBusStopLatLng1.longitude);
 
                         System.out.println("debug bustop latlng "+ busStopLocation);
 
-                        if (hasArrived(currentLocation, busStopLocation)&&!isNotiAriveShowing) {
+                        if (hasArrived(currentLocation, busStopLocation)&&!isNotiAriveShowing1) {
                             showArrivalDialog();
                             stopLocationUpdates();  // Stop further location updates
                         }
@@ -221,30 +220,29 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
             }
         };
 
-        locationRequest = LocationRequest.create();
-        locationRequest.setInterval(5000);
-        locationRequest.setFastestInterval(2000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest1 = LocationRequest.create();
+        locationRequest1.setInterval(5000);
+        locationRequest1.setFastestInterval(2000);
+        locationRequest1.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         // Start the periodic location updates
         startLocationUpdates();
 
-        startNavigationButton = findViewById(R.id.start_navigation_button);
-        startNavigationButton.setOnClickListener(new View.OnClickListener() {
+        startNavigationButton1 = findViewById(R.id.start_navigation_button);
+        startNavigationButton1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (startNavigationButton.getText().equals("Start Navigation")) {
-                    if (selectedMarker != null) {
-                        startNavigationButton.setText("Cancel Navigation");
+                if (startNavigationButton1.getText().equals("Start Navigation")) {
+                    if (selectedMarker1 != null) {
+                        startNavigationButton1.setText("Cancel Navigation");
                         // Start the polyline arrow animation
-
-
                         startNavigation();
                     } else {
                         Toast.makeText(BusStopFinderActivity.this, "Please select a bus stop first", Toast.LENGTH_SHORT).show();
                     }
-                } else if (startNavigationButton.getText().equals("Cancel Navigation")) {
-                    startNavigationButton.setText("Start Navigation");
+                } else if (startNavigationButton1.getText().equals("Cancel Navigation")) {
+                    ETA.setVisibility(View.GONE);
+                    startNavigationButton1.setText("Start Navigation");
                     cancelNavigation();
                 }
             }
@@ -271,7 +269,7 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
 
     private void showArrivalDialog() {
 
-        isNotiAriveShowing = true;
+        isNotiAriveShowing1 = true;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Arrival Notification")
@@ -281,7 +279,7 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // Handle OK button click, redirect to other activity
-                        isNotiAriveShowing = false;
+                        isNotiAriveShowing1 = false;
                         redirectToOtherActivity();
                     }
                 })
@@ -294,6 +292,7 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
         // Redirect to other activity
         // Replace "OtherActivity.class" with the desired activity class
         Intent intent = new Intent(this, PassengerMapActivity.class);
+        intent.putExtra("mapFinder",menuMap);
         startActivity(intent);
     }
 
@@ -301,7 +300,7 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
     protected void onResume() {
         super.onResume();
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
+            fusedLocationProviderClient1.requestLocationUpdates(locationRequest1, locationCallback1, null);
             startLocationUpdates();
 
                 // Register the sensor listener
@@ -320,7 +319,7 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
     @Override
     protected void onPause() {
         super.onPause();
-        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+        fusedLocationProviderClient1.removeLocationUpdates(locationCallback1);
         stopLocationUpdates();
         // Unregister the sensor listener
         SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -331,17 +330,28 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
-        mMap = googleMap;
+        mMap1 = googleMap;
 
+        if(Objects.equals(menuMap, "MAP_TYPE_NORMAL")){
+            mMap1.setMapType(googleMap.MAP_TYPE_NORMAL);
+        }else if (Objects.equals(menuMap, "MAP_TYPE_TERRAIN")){
+            mMap1.setMapType(googleMap.MAP_TYPE_TERRAIN);
+        }else if (Objects.equals(menuMap, "MAP_TYPE_SATELLITE")){
+            mMap1.setMapType(googleMap.MAP_TYPE_SATELLITE);
+        }else if (Objects.equals(menuMap, "MAP_TYPE_NONE")){
+            mMap1.setMapType(googleMap.MAP_TYPE_NONE);
+        }else if (Objects.equals(menuMap, "MAP_TYPE_HYBRID")){
+            mMap1.setMapType(googleMap.MAP_TYPE_HYBRID);
+        }
 
         // Enable the "My Location" layer on the map
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-            mMap.setMyLocationEnabled(true);
+            mMap1.setMyLocationEnabled(true);
             //mMap.setTrafficEnabled(true);
-            mMap.setIndoorEnabled(true);
-            mMap.setBuildingsEnabled(true);
-            mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+            mMap1.setIndoorEnabled(true);
+            mMap1.setBuildingsEnabled(true);
+            mMap1.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
                 @Override
                 public boolean onMyLocationButtonClick() {
                     //updateProgressDialog(10);
@@ -355,17 +365,17 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
         }
 
         // Set the map style
-        mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));
+        /*mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));*/
 
 
         // Set up marker click listener
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+        mMap1.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                if (marker.equals(selectedMarker)) {
+                if (marker.equals(selectedMarker1)) {
                     return true; // Prevent default marker click behavior
                 }
-                if (selectedMarker != null) {
+                if (selectedMarker1 != null) {
                     deselectBusStopMarker();
                 }
                 selectBusStopMarker(marker);
@@ -376,11 +386,11 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
 
         showProgressDialog("Finding nearest Bus Stops");
         // Retrieve the user's last known location and update it on the map
-        fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, location -> {
+        fusedLocationProviderClient1.getLastLocation().addOnSuccessListener(this, location -> {
             if (location != null) {
-                currentLocation = location;
-                LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+                currentLocation1 = location;
+                LatLng latLng = new LatLng(currentLocation1.getLatitude(), currentLocation1.getLongitude());
+                mMap1.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
             }
         });
     }
@@ -389,10 +399,10 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, location -> {
+            fusedLocationProviderClient1.getLastLocation().addOnSuccessListener(this, location -> {
                 if (location != null) {
-                    currentLocation = location;
-                    System.out.println("debug 1"+currentLocation);
+                    currentLocation1 = location;
+                    System.out.println("debug 1"+ currentLocation1);
                     focusCameraOnCurrentLocation();
                 }
             });
@@ -413,29 +423,29 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-        currentLocation = location;
-        System.out.println("debug 2" + updateRoute);
-        if (isNavigationMode&&updateRoute) {
+        currentLocation1 = location;
+        System.out.println("debug 2" + updateRoute1);
+        if (isNavigationMode1 && updateRoute1) {
 
             //clearRoute();
-            drawRouteToBusStopforlocationchanged(selectedBusStopLatLng); // Add a new polyline without animation
+            drawRouteToBusStopforlocationchanged(selectedBusStopLatLng1); // Add a new polyline without animation
             //updatePolylineWithDirection();
 
         }
     }
 
     private void updatePolylineWithDirection() {
-        LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+        LatLng currentLatLng = new LatLng(currentLocation1.getLatitude(), currentLocation1.getLongitude());
 
         // Fetch the updated polyline points with direction
-        getPolylineWithDirection(currentLatLng, selectedBusStopLatLng, new PolylineWithDirectionCallback() {
+        getPolylineWithDirection(currentLatLng, selectedBusStopLatLng1, new PolylineWithDirectionCallback() {
             @Override
             public void onPolylineWithDirection(PolylineOptions polylineOptions) {
                 // Remove the previous polyline
-                currentPolyline.remove();
+                currentPolyline1.remove();
 
                 // Add the updated polyline to the map
-                currentPolyline = mMap.addPolyline(polylineOptions);
+                currentPolyline1 = mMap1.addPolyline(polylineOptions);
             }
         });
     }
@@ -486,22 +496,22 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
         void onPolylineWithDirection(PolylineOptions polylineOptions);
     }
     private void removePolyline() {
-        if (currentPolyline != null) {
-            currentPolyline.remove();
-            currentPolyline = null;
+        if (currentPolyline1 != null) {
+            currentPolyline1.remove();
+            currentPolyline1 = null;
         }
     }
     private void addNewPolylineWithoutAnimation() {
         // Replace the following line with your own polyline creation logic
         PolylineOptions polylineOptions = new PolylineOptions()
-                .add(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()))
-                .add(selectedBusStopLatLng)
+                .add(new LatLng(currentLocation1.getLatitude(), currentLocation1.getLongitude()))
+                .add(selectedBusStopLatLng1)
                 .color(Color.RED);
 
-        currentPolyline = mMap.addPolyline(polylineOptions);
+        currentPolyline1 = mMap1.addPolyline(polylineOptions);
     }
     private void stopLocationUpdates() {
-        locationManager.removeUpdates(this);
+        locationManager1.removeUpdates(this);
     }
 
     // Add the missing method in your activity
@@ -523,9 +533,9 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
 
     private void startLocationUpdates() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_INTERVAL, MIN_DISTANCE, this);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_INTERVAL, MIN_DISTANCE, this);
+            fusedLocationProviderClient1.requestLocationUpdates(locationRequest1, locationCallback1, null);
+            locationManager1.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_INTERVAL1, MIN_DISTANCE1, this);
+            locationManager1.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_INTERVAL1, MIN_DISTANCE1, this);
 
         } else {
             requestLocationPermission();
@@ -600,11 +610,11 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
 
 
     private void focusCameraOnCurrentLocation() {
-        if (currentLocation != null) {
-            System.out.println("debug 3"+currentLocation);
-            currentLocationLatitude = currentLocation.getLatitude();
-            currentLocationLongitude = currentLocation.getLongitude();
-            LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+        if (currentLocation1 != null) {
+            System.out.println("debug 3"+ currentLocation1);
+            currentLocationLatitude1 = currentLocation1.getLatitude();
+            currentLocationLongitude1 = currentLocation1.getLongitude();
+            LatLng latLng = new LatLng(currentLocation1.getLatitude(), currentLocation1.getLongitude());
             //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
             ///Toast.makeText(BusStopFinderActivity.this, "Finding Nearest bustop", Toast.LENGTH_SHORT).show();
 
@@ -618,7 +628,7 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
                     busStops.sort(new Comparator<BusStop>() {
                         @Override
                         public int compare(BusStop busStop1, BusStop busStop2) {
-                            LatLng currentLatLng = new LatLng(currentLocationLatitude, currentLocationLongitude);
+                            LatLng currentLatLng = new LatLng(currentLocationLatitude1, currentLocationLongitude1);
                             LatLng latLng1 = new LatLng(busStop1.getLatitude(), busStop1.getLongitude());
                             LatLng latLng2 = new LatLng(busStop2.getLatitude(), busStop2.getLongitude());
 
@@ -630,19 +640,19 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
                     });
                     // Get the first nearest bus stop and the current location
                     LatLng firstNearestLatLng = new LatLng(busStops.get(0).getLatitude(), busStops.get(0).getLongitude());
-                    LatLng currentLatLng = new LatLng(currentLocationLatitude, currentLocationLongitude);
+                    LatLng currentLatLng = new LatLng(currentLocationLatitude1, currentLocationLongitude1);
 
                     // Include the first nearest bus stop and the current location in the camera bounds
-                    boundsBuilder.include(firstNearestLatLng);
-                    boundsBuilder.include(currentLatLng);
+                    boundsBuilder1.include(firstNearestLatLng);
+                    boundsBuilder1.include(currentLatLng);
 
                     // Move the camera to show the bus stops and the current location
-                    LatLngBounds bounds = boundsBuilder.build();
+                    LatLngBounds bounds = boundsBuilder1.build();
                     int padding = 100; // Adjust padding as needed
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding);
 
 
-                    mMap.moveCamera(cameraUpdate);
+                    mMap1.moveCamera(cameraUpdate);
                 }
             }
 
@@ -656,10 +666,10 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
 
     private void displayAllBusStopMarkers() {
         // Clear existing bus stop markers and the list
-        for (Marker marker : busStopMarkers) {
+        for (Marker marker : busStopMarkers1) {
             marker.remove();
         }
-        busStopMarkers.clear();
+        busStopMarkers1.clear();
 
         if(progressDialog.isShowing()){
             // Retrieve bus stop data from your data source
@@ -686,10 +696,10 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
                     int iconSize = 100;  // Specify the desired size (in pixels)
                     markerOptions.icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(R.drawable.bus_stop, iconSize, iconSize)));
 
-                    Marker marker = mMap.addMarker(markerOptions);
+                    Marker marker = mMap1.addMarker(markerOptions);
                     marker.setTag(busStop); // Set the bus stop object as the marker's tag
-                    busStopMarkers.add(marker);
-                    boundsBuilder.include(latLng);
+                    busStopMarkers1.add(marker);
+                    boundsBuilder1.include(latLng);
                 }
 
 
@@ -758,7 +768,7 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
                                     Bitmap originalIcon = BitmapFactory.decodeResource(getResources(), R.drawable.busstop);
                                     Bitmap resizedIcon = Bitmap.createScaledBitmap(originalIcon, 100, 100, false);
 
-                                    Marker marker = mMap.addMarker(new MarkerOptions()
+                                    Marker marker = mMap1.addMarker(new MarkerOptions()
                                             .position(busStopLatLng)
                                             .title(placeName)
                                             .icon(BitmapDescriptorFactory.fromBitmap(resizedIcon))
@@ -767,7 +777,7 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
 
                                     assert marker != null;
                                     marker.setTag(busStopLatLng);
-                                    busStopMarkers.add(marker);
+                                    busStopMarkers1.add(marker);
 
 
                                 } catch (JSONException e) {
@@ -776,29 +786,29 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
 
                             }
 
-                            mMap.setOnMarkerClickListener(marker -> {
-                                if (selectedMarker != null) {
+                            mMap1.setOnMarkerClickListener(marker -> {
+                                if (selectedMarker1 != null) {
                                     // Clear previous selection
 
                                     // Load the bus stop icon and resize it to 100x100 pixels
                                     Bitmap originalIcon = BitmapFactory.decodeResource(getResources(), R.drawable.busstopselect);
                                     Bitmap resizedIcon = Bitmap.createScaledBitmap(originalIcon, 100, 100, false);
-                                    selectedMarker.setIcon(BitmapDescriptorFactory.fromBitmap(resizedIcon));
+                                    selectedMarker1.setIcon(BitmapDescriptorFactory.fromBitmap(resizedIcon));
 
                                 }
 
                                 // Select the bus stop marker
-                                selectedBusStopLatLng = (LatLng) marker.getTag();
-                                selectedMarker = marker;
+                                selectedBusStopLatLng1 = (LatLng) marker.getTag();
+                                selectedMarker1 = marker;
                                 // Load the bus stop icon and resize it to 100x100 pixels
                                 Bitmap originalIcon = BitmapFactory.decodeResource(getResources(), R.drawable.busstopselect);
                                 Bitmap resizedIcon = Bitmap.createScaledBitmap(originalIcon, 100, 100, false);
-                                selectedMarker.setIcon(BitmapDescriptorFactory.fromBitmap(resizedIcon));
+                                selectedMarker1.setIcon(BitmapDescriptorFactory.fromBitmap(resizedIcon));
 
                                 return false;
                             });
 
-                            busStopDataFetched = true; // Set the flag to indicate that the bus stop data has been fetched
+                            busStopDataFetched1 = true; // Set the flag to indicate that the bus stop data has been fetched
                         });
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -813,9 +823,9 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
     @NonNull
     private List<BusStop> retrieveBusStops() {
         // Check if bus stop data has already been fetched
-        if (busStopDataFetched) {
+        if (busStopDataFetched1) {
             List<BusStop> busStops = new ArrayList<>();
-            for (Marker marker : busStopMarkers) {
+            for (Marker marker : busStopMarkers1) {
                 LatLng busStopLatLng = (LatLng) marker.getTag();
                 String placeName = marker.getTitle();
                 busStops.add(new BusStop(placeName, busStopLatLng.latitude, busStopLatLng.longitude));
@@ -824,7 +834,7 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
             return busStops;
         } else {
             // Fetch bus stop data using the fetchBusStops() method
-            fetchBusStops(currentLocationLatitude, currentLocationLongitude);
+            fetchBusStops(currentLocationLatitude1, currentLocationLongitude1);
 
             // Return an empty list as a placeholder until the data is fetched
             return new ArrayList<>();
@@ -833,20 +843,20 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
 
 
     private void selectBusStopMarker(Marker marker) {
-        selectedMarker = marker;
+        selectedMarker1 = marker;
         // Load the bus stop icon and resize it to 100x100 pixels
         Bitmap originalIcon = BitmapFactory.decodeResource(getResources(), R.drawable.busstop);
         Bitmap resizedIcon = Bitmap.createScaledBitmap(originalIcon, 100, 100, false);
-        selectedMarker.setIcon(BitmapDescriptorFactory.fromBitmap(resizedIcon));
+        selectedMarker1.setIcon(BitmapDescriptorFactory.fromBitmap(resizedIcon));
 
         // Update the selected bus stop's latitude and longitude
-        BusStop selectedBusStop = (BusStop) selectedMarker.getTag();
+        BusStop selectedBusStop = (BusStop) selectedMarker1.getTag();
         if (selectedBusStop != null) {
-            selectedBusStopLatLng = new LatLng(selectedBusStop.getLatitude(), selectedBusStop.getLongitude());
+            selectedBusStopLatLng1 = new LatLng(selectedBusStop.getLatitude(), selectedBusStop.getLongitude());
         }
 
         // Draw route to the selected bus stop
-        drawRouteToBusStop(selectedBusStopLatLng);
+        drawRouteToBusStop(selectedBusStopLatLng1);
 
         // Update the button text
         Button startNavigationButton = findViewById(R.id.start_navigation_button);
@@ -854,12 +864,12 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
     }
 
     private void deselectBusStopMarker() {
-        if (selectedMarker != null) {
+        if (selectedMarker1 != null) {
             // Load the bus stop icon and resize it to 100x100 pixels
             Bitmap originalIcon = BitmapFactory.decodeResource(getResources(), R.drawable.busstopselect);
             Bitmap resizedIcon = Bitmap.createScaledBitmap(originalIcon, 100, 100, false);
-            selectedMarker.setIcon(BitmapDescriptorFactory.fromBitmap(resizedIcon));
-            selectedMarker = null;
+            selectedMarker1.setIcon(BitmapDescriptorFactory.fromBitmap(resizedIcon));
+            selectedMarker1 = null;
         }
         clearRoute();
         clearBusStopPolyline();
@@ -868,27 +878,27 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
     }
 
     private void drawRouteToBusStop(LatLng destinationLatLng) {
-        if (currentLocation == null || destinationLatLng == null) {
+        if (currentLocation1 == null || destinationLatLng == null) {
             return;
         }
 
-        origin = currentLocation.getLatitude() + "," + currentLocation.getLongitude();
-        LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-        destination = destinationLatLng.latitude + "," + destinationLatLng.longitude;
-        System.out.println("debug 4" + currentLocation);
+        origin1 = currentLocation1.getLatitude() + "," + currentLocation1.getLongitude();
+        LatLng currentLatLng = new LatLng(currentLocation1.getLatitude(), currentLocation1.getLongitude());
+        destination1 = destinationLatLng.latitude + "," + destinationLatLng.longitude;
+        System.out.println("debug 4" + currentLocation1);
         GeoApiContext geoApiContext = new GeoApiContext.Builder()
                 .apiKey("AIzaSyCuBp-Fnefr1Xe5RxLgxMh3D2OzOQzxyaE")
                 .build();
 
         DirectionsApiRequest directionsApiRequest = DirectionsApi.newRequest(geoApiContext)
                 .mode(TravelMode.WALKING)
-                .origin(origin)
-                .destination(destination);
+                .origin(origin1)
+                .destination(destination1);
 
         directionsApiRequest.setCallback(new PendingResult.Callback<DirectionsResult>() {
             @Override
             public void onResult(DirectionsResult result) {
-                handler.post(() -> {
+                handler1.post(() -> {
                     if (result.routes != null && result.routes.length > 0) {
                         DirectionsRoute route = result.routes[0];
                         if (route.legs != null && route.legs.length > 0) {
@@ -907,7 +917,7 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
 
             @Override
             public void onFailure(Throwable e) {
-                handler.post(() -> {
+                handler1.post(() -> {
                     Toast.makeText(BusStopFinderActivity.this, "Failed to retrieve directions", Toast.LENGTH_SHORT).show();
                 });
             }
@@ -924,13 +934,13 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
 
 
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(originLatLng,18));
+        mMap1.moveCamera(CameraUpdateFactory.newLatLngZoom(originLatLng,18));
 
         progressBar1.setVisibility(View.VISIBLE); // Show the progress bar
-
+        progressBar1.playAnimation();
         // Delay the start of the animation by a short duration (adjust as needed)
         Handler handler = new Handler();
-        int delay = 2000; // 1 second delay before starting the animation
+        int delay = 4000; // 1 second delay before starting the animation
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -939,7 +949,7 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
                 for (int i = 0; i < points.size() - 1; i++) {
                     totalDistance += SphericalUtil.computeDistanceBetween(points.get(i), points.get(i + 1));
                 }
-                currentPolyline = mMap.addPolyline(polylineOptions);
+                currentPolyline1 = mMap1.addPolyline(polylineOptions);
                 // Find the nearest point on the polyline to the current location
                 LatLng nearestPoint = findNearestPointOnPolyline(points, originLatLng);
                 int nearestIndex = points.indexOf(nearestPoint);
@@ -978,7 +988,7 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
                         }
 
                         // Update the polyline
-                        currentPolyline.setPoints(newPoints);
+                        currentPolyline1.setPoints(newPoints);
 
                         // Move the camera smoothly along with the animation
                         LatLngBounds.Builder builder = new LatLngBounds.Builder();
@@ -990,10 +1000,10 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
                         // Calculate padding for the camera bounds (adjust as needed)
                         int padding = 100;
                         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-                        mMap.moveCamera(cameraUpdate);
+                        mMap1.moveCamera(cameraUpdate);
                     }
                 });
-
+                progressBar1.cancelAnimation();
                 progressBar1.setVisibility(View.GONE); // Hide the progress bar
 
 
@@ -1003,18 +1013,18 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         startLocationUpdates();
-                        updateRoute = true; // Set updateRoute to true after the animation finishes
-                        startNavigationButton.setClickable(true);
+                        updateRoute1 = true; // Set updateRoute to true after the animation finishes
+                        startNavigationButton1.setClickable(true);
+                        ETA.setVisibility(View.VISIBLE);
                     }
-
 
                     @Override
                     public void onAnimationStart(Animator animation) {
                         super.onAnimationStart(animation);
                         //stopLocationUpdates();
 
-                        updateRoute = false;
-                        startNavigationButton.setClickable(false);
+                        updateRoute1 = false;
+                        startNavigationButton1.setClickable(false);
                     }
                 });
 
@@ -1029,30 +1039,30 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
     }
 
     private void drawRouteToBusStopforlocationchanged(LatLng destinationLatLng) {
-        if (currentLocation == null || destinationLatLng == null) {
+        if (currentLocation1 == null || destinationLatLng == null) {
             return;
         }
 
         // Replace 'R.id.estimated_time_textview' with the ID of your TextView in the layout XML file
         TextView estimatedTimeTextView = findViewById(R.id.estimated_time_textview);
 
-        origin = currentLocation.getLatitude() + "," + currentLocation.getLongitude();
-        LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-        destination = destinationLatLng.latitude + "," + destinationLatLng.longitude;
-        System.out.println("debug 4" + currentLocation);
+        origin1 = currentLocation1.getLatitude() + "," + currentLocation1.getLongitude();
+        LatLng currentLatLng = new LatLng(currentLocation1.getLatitude(), currentLocation1.getLongitude());
+        destination1 = destinationLatLng.latitude + "," + destinationLatLng.longitude;
+        System.out.println("debug 4" + currentLocation1);
         GeoApiContext geoApiContext = new GeoApiContext.Builder()
                 .apiKey("AIzaSyCuBp-Fnefr1Xe5RxLgxMh3D2OzOQzxyaE")
                 .build();
 
         DirectionsApiRequest directionsApiRequest = DirectionsApi.newRequest(geoApiContext)
                 .mode(TravelMode.WALKING)
-                .origin(origin)
-                .destination(destination);
+                .origin(origin1)
+                .destination(destination1);
 
         directionsApiRequest.setCallback(new PendingResult.Callback<DirectionsResult>() {
             @Override
             public void onResult(DirectionsResult result) {
-                handler.post(() -> {
+                handler1.post(() -> {
                     if (result.routes != null && result.routes.length > 0) {
                         DirectionsRoute route = result.routes[0];
                         if (route.legs != null && route.legs.length > 0) {
@@ -1093,7 +1103,7 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
 
             @Override
             public void onFailure(Throwable e) {
-                handler.post(() -> {
+                handler1.post(() -> {
                     Toast.makeText(BusStopFinderActivity.this, "Failed to retrieve directions", Toast.LENGTH_SHORT).show();
                 });
             }
@@ -1107,7 +1117,7 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
                 .width(15)
                 .clickable(false);
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(originLatLng,18));
+        mMap1.moveCamera(CameraUpdateFactory.newLatLngZoom(originLatLng,18));
 
         //progressBar.setVisibility(View.VISIBLE); // Show the progress bar
 
@@ -1116,10 +1126,10 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
                 for (int i = 0; i < points.size() - 1; i++) {
                     totalDistance += SphericalUtil.computeDistanceBetween(points.get(i), points.get(i + 1));
                 }
-                if(currentPolyline!=null){
+                if(currentPolyline1 !=null){
                     clearRoute();
                 }
-                currentPolyline = mMap.addPolyline(polylineOptions);
+                currentPolyline1 = mMap1.addPolyline(polylineOptions);
                 // Find the nearest point on the polyline to the current location
                 LatLng nearestPoint = findNearestPointOnPolyline(points, originLatLng);
                 int nearestIndex = points.indexOf(nearestPoint);
@@ -1158,7 +1168,7 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
                         }
 
                         // Update the polyline
-                        currentPolyline.setPoints(newPoints);
+                        currentPolyline1.setPoints(newPoints);
 
                     }
                 });
@@ -1189,35 +1199,35 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
 
 
     private void clearRoute() {
-        if (currentPolyline != null) {
-            currentPolyline.remove();
-            currentPolyline = null;
+        if (currentPolyline1 != null) {
+            currentPolyline1.remove();
+            currentPolyline1 = null;
         }
     }
 
     private void clearBusStopPolyline() {
-        for (Marker marker : busStopMarkers) {
+        for (Marker marker : busStopMarkers1) {
             // Load the bus stop icon and resize it to 100x100 pixels
             Bitmap originalIcon = BitmapFactory.decodeResource(getResources(), R.drawable.busstop);
             Bitmap resizedIcon = Bitmap.createScaledBitmap(originalIcon, 100, 100, false);
             marker.setIcon(BitmapDescriptorFactory.fromBitmap(resizedIcon));
         }
-        busStopMarkers.clear();
-        boundsBuilder = new LatLngBounds.Builder();
+        busStopMarkers1.clear();
+        boundsBuilder1 = new LatLngBounds.Builder();
     }
 
     private void startNavigation() {
 
-        isNavigationMode = true;
+        isNavigationMode1 = true;
         // Hide the bus stop markers
-        for (Marker marker : busStopMarkers) {
+        for (Marker marker : busStopMarkers1) {
             marker.setVisible(true);
-            selectedMarker.setVisible(true);
+            selectedMarker1.setVisible(true);
         }
 
 
         // Draw route from current location to selected bus stop
-        drawRouteToBusStop(selectedBusStopLatLng);
+        drawRouteToBusStop(selectedBusStopLatLng1);
 
         // Start updating location for navigation
         startLocationUpdates();
@@ -1228,22 +1238,22 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
         // ...
 
         // Add navigation UI to the map
-        mMap.setPadding(0, 0, 0, navigationUI.getHeight());
-        mMap.getUiSettings().setCompassEnabled(true);
-        mMap.getUiSettings().setMapToolbarEnabled(true);
+        mMap1.setPadding(0, 0, 0, navigationUI.getHeight());
+        mMap1.getUiSettings().setCompassEnabled(true);
+        mMap1.getUiSettings().setMapToolbarEnabled(true);
 
 
     }
 
     private void cancelNavigation() {
-        isNavigationMode = false;
-        updateRoute=false;
+        isNavigationMode1 = false;
+        updateRoute1 =false;
 
-        selectedMarker.setRotation(0); // Reset the rotation of the marker
+        selectedMarker1.setRotation(0); // Reset the rotation of the marker
         // Show the bus stop markers
-        for (Marker marker : busStopMarkers) {
+        for (Marker marker : busStopMarkers1) {
             marker.setVisible(true);
-            selectedMarker.setVisible(true);
+            selectedMarker1.setVisible(true);
         }
 
 
@@ -1253,27 +1263,27 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
         clearBusStopPolyline();
 
         // Stop updating location for navigation
-        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+        fusedLocationProviderClient1.removeLocationUpdates(locationCallback1);
 
         // Remove navigation UI from the map
-        mMap.setPadding(0, 0, 0, 0);
-        mMap.getUiSettings().setCompassEnabled(true);
-        mMap.getUiSettings().setMapToolbarEnabled(false);
-        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        mMap1.setPadding(0, 0, 0, 0);
+        mMap1.getUiSettings().setCompassEnabled(true);
+        mMap1.getUiSettings().setMapToolbarEnabled(false);
+        mMap1.getUiSettings().setMyLocationButtonEnabled(true);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            accelerometerData = event.values;
+            accelerometerData1 = event.values;
         } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            magnetometerData = event.values;
+            magnetometerData1 = event.values;
         }
 
-        if (accelerometerData != null && magnetometerData != null) {
+        if (accelerometerData1 != null && magnetometerData1 != null) {
             // Compute the device's orientation
             float[] rotationMatrix = new float[9];
-            boolean success = SensorManager.getRotationMatrix(rotationMatrix, null, accelerometerData, magnetometerData);
+            boolean success = SensorManager.getRotationMatrix(rotationMatrix, null, accelerometerData1, magnetometerData1);
             if (success) {
                 float[] orientation = new float[3];
                 SensorManager.getOrientation(rotationMatrix, orientation);
@@ -1294,7 +1304,7 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
     }
 
     private void rotateCamera(float azimuth) {
-        if (mMap != null&&isNavigationMode&&updateRoute) {
+        if (mMap1 != null&& isNavigationMode1 && updateRoute1) {
             // Adjust the azimuth value to range from 0 to 360 degrees
             //float calibratedAzimuth = (azimuth + 360) % 360;
 
@@ -1302,11 +1312,11 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
             float sensitivityFactor = 0.5f; // Adjust the value as needed
             float adjustedAzimuth = azimuth * sensitivityFactor;
 
-            CameraPosition currentCameraPosition = mMap.getCameraPosition();
+            CameraPosition currentCameraPosition = mMap1.getCameraPosition();
             CameraPosition newCameraPosition = CameraPosition.builder(currentCameraPosition)
                     .bearing(adjustedAzimuth)
                     .build();
-            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(newCameraPosition));
+            mMap1.moveCamera(CameraUpdateFactory.newCameraPosition(newCameraPosition));
         }
     }
 }

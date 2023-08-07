@@ -2,11 +2,14 @@ package com.example.buslocatorsystem;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -25,8 +28,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -57,6 +62,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
@@ -92,7 +98,7 @@ public class DriverMapsActivity extends AppCompatActivity implements OnMapReadyC
 
     private String driverCurrentUid ;
     private String driverCurrentId;
-    private Button selectLocationButton; // Add a Button to your layout and assign it here
+    private LottieAnimationView selectLocationButton, selectMapTypeButton; // Add a Button to your layout and assign it here
     private LatLng selectedLocation; // Add this variable to store the selected location
     // Get the current user from FirebaseAuth
     FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
@@ -138,6 +144,7 @@ private LatLng driverlocaiton,fixedLocation;
         String value = parts[0];
         driverCurrentId = value;
 
+
         // Initialize passengerMarkers map
         passengerMarkers = new HashMap<>();
 
@@ -170,6 +177,27 @@ private LatLng driverlocaiton,fixedLocation;
             }
         });
 
+        selectMapTypeButton = findViewById(R.id.selectMapType);
+        selectMapTypeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPopupMenuMapType(v);
+            }
+        });
+
+        loadProfileInfo();
+
+        // Initialize Firebase Messaging
+        FirebaseMessaging.getInstance().setAutoInitEnabled(true);
+
+        // Check if the user has granted notification permission. If not, request permission.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager.getNotificationChannel("chat_notifications") == null) {
+                NotificationChannel channel = new NotificationChannel("chat_notifications", "Chat Notifications", NotificationManager.IMPORTANCE_HIGH);
+                manager.createNotificationChannel(channel);
+            }
+        }
     }
     private void loadProfileInfo() {
         // Check if the current user is authenticated
@@ -180,8 +208,6 @@ private LatLng driverlocaiton,fixedLocation;
 
             // Get the driver's unique ID
             String driverId = driverCurrentId;
-
-
 
             // Retrieve the driver's profile information from the database
             assert driverId != null;
@@ -217,7 +243,6 @@ private LatLng driverlocaiton,fixedLocation;
         PopupMenu popupMenu = new PopupMenu(this, view);
         popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu()); // Create a new menu resource file named popup_menu.xml
 
-        loadProfileInfo();
 
         if(Objects.equals(routes, "Route 1")){
             popupMenu.getMenu().findItem(R.id.putatan).setVisible(true);
@@ -239,7 +264,7 @@ private LatLng driverlocaiton,fixedLocation;
             popupMenu.getMenu().findItem(R.id.kota_kinabalu).setVisible(false);
             popupMenu.getMenu().findItem(R.id.kinarut).setVisible(false);
             popupMenu.getMenu().findItem(R.id.penampang).setVisible(false);
-            Toast.makeText(DriverMapsActivity.this,"Having Error detecting the routes",Toast.LENGTH_LONG ).show();
+            Toast.makeText(DriverMapsActivity.this,"Having Error detecting the routes",Toast.LENGTH_SHORT ).show();
         }
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -274,6 +299,41 @@ private LatLng driverlocaiton,fixedLocation;
                     getPolylineRoute(firebaseUser.getUid(), new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), selectedLocation);
                 }
 
+                return true;
+            }
+        });
+
+        popupMenu.show();
+    }
+    private void showPopupMenuMapType(View view) {
+        PopupMenu popupMenu = new PopupMenu(this, view);
+        popupMenu.getMenuInflater().inflate(R.menu.popup_menu_map_type, popupMenu.getMenu()); // Create a new menu resource file named popup_menu.xml
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.MAP_TYPE_NORMAL:
+                        // Handle Putatan selection
+                        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                        break;
+                    case R.id.MAP_TYPE_TERRAIN:
+                        // Handle Putatan selection
+                        mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                        break;
+                    case R.id.MAP_TYPE_SATELLITE:
+                        // Handle Kota Kinabalu selection
+                        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                        break;
+                    case R.id.MAP_TYPE_NONE:
+                        // Handle Putatan selection
+                        mMap.setMapType(GoogleMap.MAP_TYPE_NONE);
+                        break;
+                    case R.id.MAP_TYPE_HYBRID:
+                        // Handle Kota Kinabalu selection
+                        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                        break;
+                }
                 return true;
             }
         });
@@ -372,7 +432,6 @@ private LatLng driverlocaiton,fixedLocation;
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             enableMyLocation();
         } else {
@@ -385,6 +444,7 @@ private LatLng driverlocaiton,fixedLocation;
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 listenToRequestNode();
+
             }
 
             @Override
@@ -414,7 +474,7 @@ private LatLng driverlocaiton,fixedLocation;
     private void enableMyLocation() {
         // Check if location permission is granted
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
+
 
             fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, location -> {
                 if (location != null) {
@@ -437,8 +497,8 @@ private void listenToRequestNode(){
         public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
             // Get the passenger ID
             String passengerId = dataSnapshot.getKey();
-
             getMarkerMultiplePassengers(passengerId);
+
         }
 
         @Override
@@ -451,14 +511,10 @@ private void listenToRequestNode(){
 
         @Override
         public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-            // Get the passenger ID
-            String passengerId = dataSnapshot.getKey();
-
-            // Remove the passenger's marker from the map
-            Marker passengerMarker = passengerMarkers.remove(passengerId);
-            if (passengerMarker != null) {
-                passengerMarker.remove();
+            for (Marker marker : passengerMarkers.values()) {
+                marker.remove();
             }
+            passengerMarkers.clear();
         }
 
         @Override
@@ -472,6 +528,9 @@ private void listenToRequestNode(){
         }
     });
 }
+
+
+
     private void refreshMap() {
         // Update the driver's location marker
         updateDriverMarker();

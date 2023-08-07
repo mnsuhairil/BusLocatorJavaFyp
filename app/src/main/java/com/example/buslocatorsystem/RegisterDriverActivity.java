@@ -5,6 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -12,6 +15,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -22,12 +26,15 @@ public class RegisterDriverActivity extends AppCompatActivity {
     private EditText editTextDriverName;
     private EditText editTextDriverBusId;
     private EditText editTextDriverPassword;
-    private Spinner spinnerDriverRoute;
+    private AutoCompleteTextView spinnerDriverRoute;
     private Button btnRegisterDriver;
 
     private DatabaseReference driversRef;
     private DatabaseReference usersRef;
     private FirebaseAuth mAuth;
+    AutoCompleteTextView autoCompleteTextView2;
+    ArrayAdapter<String> adapterItems2;
+    String[] item3 = {"Available" , "Not available"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,14 +50,28 @@ public class RegisterDriverActivity extends AppCompatActivity {
         // Initialize views
         editTextDriverName = findViewById(R.id.editTextDriverName);
         editTextDriverBusId = findViewById(R.id.editTextDriverBusId);
-        spinnerDriverRoute = findViewById(R.id.spinnerDriverRoute);
         editTextDriverPassword = findViewById(R.id.editTextDriverPassword);
         btnRegisterDriver = findViewById(R.id.btnRegisterDriver);
 
-        // Register driver button click listener
+        TextInputLayout materialRoutes = findViewById(R.id.materialRoutes);
+
+        // Set the outline color to colorPrimary
+        materialRoutes.setBoxStrokeColor(getResources().getColor(R.color.colorPrimary));
+
+        // Assuming you have an array of routes as your dropdown items
+        String[] routes = {"Route 1", "Route 2", "Route 3"};
+
+        // Find the AutoCompleteTextView in the layout
+        spinnerDriverRoute = findViewById(R.id.spinnerDriverRoute);
+
+        // Set up the adapter for the AutoCompleteTextView
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, routes);
+        spinnerDriverRoute.setAdapter(adapter);
+
         btnRegisterDriver.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
                 registerDriver();
             }
         });
@@ -60,7 +81,7 @@ public class RegisterDriverActivity extends AppCompatActivity {
         // Get the input values
         String driverName = editTextDriverName.getText().toString().trim();
         String driverBusId = editTextDriverBusId.getText().toString().trim();
-        String driverRoute = spinnerDriverRoute.getSelectedItem().toString();
+        String driverRoute = spinnerDriverRoute.getText().toString();
         String driverPassword = editTextDriverPassword.getText().toString().trim();
 
         // Validate the input values

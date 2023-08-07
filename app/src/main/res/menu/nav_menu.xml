@@ -5,7 +5,7 @@
         android:title="Select Bus" />
     <item
         android:id="@+id/menu_profile"
-        android:title="Profile" />
+        android:title="Bus stop Finder" />
     <item
         android:id="@+id/menu_logout"
         android:title="Logout" />

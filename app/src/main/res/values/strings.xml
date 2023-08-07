@@ -6,5 +6,29 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="google_maps_key">AIzaSyCuBp-Fnefr1Xe5RxLgxMh3D2OzOQzxyaE</string>
+    <string name="top_icon">TOP ICON</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login">LOGIN</string>
+    <string name="forgot_password">FORGOT PASSWORD?</string>
+    <string name="or">OR</string>
+    <string name="google_icon">google icon</string>
+    <string name="facebook_icon">facebook icon</string>
+    <string name="new_user_register_now">New User? Register Now</string>
+    
+    <string-array name="bus_oil_statuses">
+        <item>Low</item>
+        <item>Middle</item>
+        <item>High</item>
+    </string-array>
 
+    <string-array name="sorting_criteria_array">
+        <item>Name</item>
+        <item>Route</item>
+        <item>Bus ID</item> <!-- Add Bus ID as a sorting criteria -->
+    </string-array>
+
+    <!--tester-->
+    <string name="gettingstart">Grow your business with Zomo.</string>
+    <string name="gettingsubtext">An international text agency with some of the industrys sharpest and most creative writers stand ready to create the texts you need.</string>
 </resources>

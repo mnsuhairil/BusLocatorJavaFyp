@@ -1,64 +1,185 @@
 package com.example.buslocatorsystem;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorManager;
 import android.location.Location;
+import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.MediaStore;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupMenu;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.bumptech.glide.Glide;
+import com.etebarian.meowbottomnavigation.MeowBottomNavigation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.google.gson.Gson;
+import com.google.maps.DirectionsApi;
+import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
+import com.google.maps.PendingResult;
+import com.google.maps.android.PolyUtil;
+import com.google.maps.android.SphericalUtil;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.DirectionsRoute;
+import com.google.maps.model.DirectionsStep;
+import com.google.maps.model.EncodedPolyline;
+import com.google.maps.model.TravelMode;
 
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+
+import de.hdodenhof.circleimageview.CircleImageView;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+import android.app.AlertDialog;
+import android.hardware.SensorEventListener;
+
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.MediaStore;
+import android.text.InputType;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.bumptech.glide.Glide;
+import com.example.buslocatorsystem.R;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 public class PassengerMapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
@@ -66,6 +187,7 @@ public class PassengerMapActivity extends AppCompatActivity implements OnMapRead
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
+    private LottieAnimationView selectMapTypeButton;
     private Location mLastLocation;
     private LocationRequest mLocationRequest;
     private DatabaseReference mDatabase;
@@ -86,149 +208,281 @@ public class PassengerMapActivity extends AppCompatActivity implements OnMapRead
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private Marker passengerMarker;
 
+    private MeowBottomNavigation bottomNavigation;
+    RelativeLayout passengerHome, passengerNearbyBustop;
+
+    //profile
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int REQUEST_IMAGE_PICK = 2;
+
+    private ImageView profileImageView;
+    private TextView emailTextView;
+    private TextView nameTextView;
+    private TextView usernameTextView;
+    private TextView phoneTextView;
+    private TextView passwordTextView;
+
+    private Uri selectedImageUri; // Initialize Firebase Realtime Database
+
+    private Handler handler;
+    private String mapMenu;
+    private String menuMap;
+    private String usernamePassenger;
+    private TextView genderTextView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_passenger_map);
 
-        // Get current user from FirebaseAuth
-        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        menuMap = getIntent().getStringExtra("mapFinder");
 
+        passengerHome = findViewById(R.id.passengerMap);
+        passengerNearbyBustop = findViewById(R.id.nearbyBustop);
 
+        bottomNavigation = findViewById(R.id.bottomNavigation);
 
-        // Initialize Firebase Realtime Database
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+        bottomNavigation.show(1, true);
+        bottomNavigation.add(new MeowBottomNavigation.Model(1, R.drawable.ic_map));
+        bottomNavigation.add(new MeowBottomNavigation.Model(2, R.drawable.profile));
 
-        // Build GoogleApiClient
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-
-        // Create LocationRequest
-        mLocationRequest = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(1000) // Update location every second (change as needed)
-                .setFastestInterval(1000); // Fastest update interval
-
-        geoApiContext = new GeoApiContext.Builder()
-                .apiKey("AIzaSyCuBp-Fnefr1Xe5RxLgxMh3D2OzOQzxyaE")
-                .build();
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.mapFragment);
-        assert mapFragment != null;
-        mapFragment.getMapAsync(this);
-
-
-        drawerLayout = findViewById(R.id.drawerLayout);
-        NavigationView navigationView = findViewById(R.id.navigationView);
-        toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-
-        displayNavHeader();
-
-        //getcurent user id
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        String passengerUserId = currentUser.getUid();
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        // Set up the request pickup button
-        requestPickupButton = findViewById(R.id.requestPickupButton);
-        requestPickupButton.setOnClickListener(new View.OnClickListener() {
+        bottomNavigation.setOnClickMenuListener(new Function1<MeowBottomNavigation.Model, Unit>() {
             @Override
-            public void onClick(View v) {
-                if (currentBusId != null) {
-                    // Check if the button text is "REQUEST PICKUP"
-                    if (requestPickupButton.getText().equals("REQUEST PICKUP")) {
-                        // Retrieve passenger username from the database
-                        DatabaseReference passengersRef = FirebaseDatabase.getInstance().getReference("users/passengers");
-                        passengersRef.child(passengerUserId).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                if (dataSnapshot.exists()) {
-                                    String uname = dataSnapshot.child("uname").getValue(String.class);
-                                    System.out.println("Passenger's uname: " + uname);
-                                    fetchPassengerInformationAndCreateRequestData(uname);
-                                    requestPickupButton.setText("CANCEL"); // Change the button text to "CANCEL"
-                                } else {
-                                    System.out.println("Passenger not found");
-                                }
-                            }
+            public Unit invoke(MeowBottomNavigation.Model model) {
+                // YOUR CODES
 
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                                System.out.println("Error retrieving passenger's uname: " + databaseError.getMessage());
-                            }
-                        });
-                    } else {
-                        // The button text is "CANCEL", so remove the requestPickup data from the database
-                        DatabaseReference requestPickupRef = FirebaseDatabase.getInstance().getReference("requestPickups")
-                                .child(currentBusId).child("REQ-" + getCurrentUserId());
-                        requestPickupRef.removeValue()
-                                .addOnCompleteListener(task -> {
-                                    if (task.isSuccessful()) {
-                                        // RequestPickup data removed successfully
-                                        Toast.makeText(PassengerMapActivity.this, "Request canceled", Toast.LENGTH_SHORT).show();
-                                        requestPickupButton.setText("REQUEST PICKUP"); // Change the button text back to "REQUEST PICKUP"
-                                    } else {
-                                        // Error occurred while removing RequestPickup data
-                                        Toast.makeText(PassengerMapActivity.this, "Failed to cancel request", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                    }
-                } else {
-                    Toast.makeText(PassengerMapActivity.this, "Please select a bus first.", Toast.LENGTH_SHORT).show();
+                switch (model.getId()) {
+
+                    case 1:
+                        passengerHome.setVisibility(View.VISIBLE);
+                        passengerNearbyBustop.setVisibility(View.GONE);
+
+                        break;
+
+                    case 2:
+                        passengerHome.setVisibility(View.GONE);
+                        passengerNearbyBustop.setVisibility(View.VISIBLE);
+
+
+                        break;
+
                 }
+                return null;
             }
         });
 
+            // Get current user from FirebaseAuth
+            currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                int id = item.getItemId();
-                if (id == R.id.menu_select_bus) {
-                    if (requestPickupButton.getText()=="CANCEL"){
-                        Toast.makeText(PassengerMapActivity.this,"Please cancel the request first",Toast.LENGTH_LONG).show();
-                    }else showBusSelectionDialog();
-                } else if (id == R.id.menu_profile) {
-                    if (requestPickupButton.getText()=="CANCEL"){
-                        Toast.makeText(PassengerMapActivity.this,"Please cancel the request first",Toast.LENGTH_LONG).show();
-                    }else startActivity(new Intent(PassengerMapActivity.this, PassengerProfileActivity.class));
-                } else if (id == R.id.menu_logout) {
-                    // Implement your logout logic here
-                    logout();
+            // Initialize Firebase Realtime Database
+            mDatabase = FirebaseDatabase.getInstance().getReference();
+
+            // Build GoogleApiClient
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+
+            // Create LocationRequest
+            mLocationRequest = LocationRequest.create()
+                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                    .setInterval(1000) // Update location every second (change as needed)
+                    .setFastestInterval(1000); // Fastest update interval
+
+            geoApiContext = new GeoApiContext.Builder()
+                    .apiKey("AIzaSyCuBp-Fnefr1Xe5RxLgxMh3D2OzOQzxyaE")
+                    .build();
+
+            // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.mapFragment);
+            assert mapFragment != null;
+            mapFragment.getMapAsync(this);
+
+
+            drawerLayout = findViewById(R.id.drawerLayout);
+            NavigationView navigationView = findViewById(R.id.navigationView);
+            toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            drawerLayout.addDrawerListener(toggle);
+            toggle.syncState();
+            Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+
+            displayNavHeader();
+
+            //getcurent user id
+            FirebaseAuth mAuth = FirebaseAuth.getInstance();
+            FirebaseUser currentUser = mAuth.getCurrentUser();
+            String passengerUserId = currentUser.getUid();
+            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+            // Set up the request pickup button
+            requestPickupButton = findViewById(R.id.requestPickupButton);
+            requestPickupButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (currentBusId != null) {
+                        // Check if the button text is "REQUEST PICKUP"
+                        if (requestPickupButton.getText().equals("REQUEST PICKUP")) {
+                            // Retrieve passenger username from the database
+                            DatabaseReference passengersRef = FirebaseDatabase.getInstance().getReference("users/passengers");
+                            passengersRef.child(passengerUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    if (dataSnapshot.exists()) {
+                                        String uname = dataSnapshot.child("uname").getValue(String.class);
+                                        System.out.println("Passenger's uname: " + uname);
+                                        fetchPassengerInformationAndCreateRequestData(uname);
+                                        requestPickupButton.setText("CANCEL"); // Change the button text to "CANCEL"
+                                    } else {
+                                        System.out.println("Passenger not found");
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+                                    System.out.println("Error retrieving passenger's uname: " + databaseError.getMessage());
+                                }
+                            });
+                        } else {
+                            // The button text is "CANCEL", so remove the requestPickup data from the database
+                            DatabaseReference requestPickupRef = FirebaseDatabase.getInstance().getReference("requestPickups")
+                                    .child(currentBusId).child("REQ-" + getCurrentUserId());
+                            requestPickupRef.removeValue()
+                                    .addOnCompleteListener(task -> {
+                                        if (task.isSuccessful()) {
+                                            // RequestPickup data removed successfully
+                                            Toast.makeText(PassengerMapActivity.this, "Request canceled", Toast.LENGTH_SHORT).show();
+                                            requestPickupButton.setText("REQUEST PICKUP"); // Change the button text back to "REQUEST PICKUP"
+                                        } else {
+                                            // Error occurred while removing RequestPickup data
+                                            Toast.makeText(PassengerMapActivity.this, "Failed to cancel request", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        }
+                    } else {
+                        Toast.makeText(PassengerMapActivity.this, "Please select a bus first.", Toast.LENGTH_SHORT).show();
+                    }
                 }
-                drawerLayout.closeDrawers();
+            });
+
+
+            navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                    int id = item.getItemId();
+                    if (id == R.id.menu_select_bus) {
+                        if (requestPickupButton.getText()=="CANCEL"){
+                            Toast.makeText(PassengerMapActivity.this,"Please cancel the request first",Toast.LENGTH_LONG).show();
+                        }else showBusSelectionDialog();
+                    } else if (id == R.id.menu_profile) {
+                        if (requestPickupButton.getText()=="CANCEL"){
+                            Toast.makeText(PassengerMapActivity.this,"Please cancel the request first",Toast.LENGTH_LONG).show();
+                        }else {
+
+                            Intent intent = new Intent(PassengerMapActivity.this, BusStopFinderActivity.class);
+                            intent.putExtra("mapTypeSelected", mapMenu);
+                            startActivity(intent);
+                        }
+                    } else if (id == R.id.menu_logout) {
+                        // Implement your logout logic here
+                        logout();
+                    }
+                    drawerLayout.closeDrawers();
+                    return true;
+                }
+            });
+
+            selectMapTypeButton = findViewById(R.id.selectMapType);
+            selectMapTypeButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showPopupMenuMapType(v);
+                }
+            });
+
+            //profile
+        // Get current user from FirebaseAuth
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        // Initialize views
+        genderTextView = findViewById(R.id.genderTextView);
+        profileImageView = findViewById(R.id.profileImageView);
+        emailTextView = findViewById(R.id.emailTextView);
+        nameTextView = findViewById(R.id.nameTextView);
+        usernameTextView = findViewById(R.id.usernameTextView);
+        phoneTextView = findViewById(R.id.phoneTextView);
+        passwordTextView = findViewById(R.id.passwordTextView);
+
+        // Set profile image and other information
+        setProfileImage() ;
+
+        handler = new Handler(Looper.getMainLooper());
+        startDataUpdates();
+
+        // Set up click listeners
+        profileImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectImage();
+            }
+        });
+
+        findViewById(R.id.editButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showEditDialog();
+            }
+        });
+
+        // Enable back button in the action bar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+
+    }
+
+    private void showPopupMenuMapType(View view) {
+        PopupMenu popupMenu = new PopupMenu(this, view);
+        popupMenu.getMenuInflater().inflate(R.menu.popup_menu_map_type, popupMenu.getMenu()); // Create a new menu resource file named popup_menu.xml
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.MAP_TYPE_NORMAL:
+                        // Handle Putatan selection
+                        mapMenu = "MAP_TYPE_NORMAL";
+                        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                        break;
+                    case R.id.MAP_TYPE_TERRAIN:
+                        // Handle Putatan selection
+                        mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                        mapMenu = "MAP_TYPE_TERRAIN";
+                        break;
+                    case R.id.MAP_TYPE_SATELLITE:
+                        // Handle Kota Kinabalu selection
+                        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                        mapMenu = "MAP_TYPE_SATELLITE";
+                        break;
+                    case R.id.MAP_TYPE_NONE:
+                        // Handle Putatan selection
+                        mMap.setMapType(GoogleMap.MAP_TYPE_NONE);
+                        mapMenu = "MAP_TYPE_NONE";
+                        break;
+                    case R.id.MAP_TYPE_HYBRID:
+                        // Handle Kota Kinabalu selection
+                        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                        mapMenu = "MAP_TYPE_HYBRID";
+                        break;
+                }
                 return true;
             }
         });
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                int id = item.getItemId();
-                if (id == R.id.action_map) {
-                    // Handle "Map" menu item click
-                    // You can keep the current behavior or implement your own logic
-                    return true;
-                } else if (id == R.id.action_bus_stop_finder) {
-                    // Handle "Bus Stop Finder" menu item click
-                    startActivity(new Intent(PassengerMapActivity.this, BusStopFinderActivity.class));
-                    return true;
-                }
-                return false;
-            }
-        });
+        popupMenu.show();
     }
-
     private void displayNavHeader(){
         DatabaseReference databaseReferenceUsername = firebaseDatabase.getReference("users");
         databaseReferenceUsername.child("passengers").child(currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -236,7 +490,7 @@ public class PassengerMapActivity extends AppCompatActivity implements OnMapRead
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()){
                     String username = snapshot.child("uname").getValue(String.class);
-                    getInfoPassenger(username);
+                    getInfoPassenger1(username);
                 }
             }
 
@@ -246,15 +500,13 @@ public class PassengerMapActivity extends AppCompatActivity implements OnMapRead
             }
         });
     }
-    private void getInfoPassenger(String uname){
-
-
+    private void getInfoPassenger1(String uname){
 
         DatabaseReference databaseReference = firebaseDatabase.getReference("passengers");
 
         NavigationView navigationView = findViewById(R.id.navigationView);
         View navHeaderView = navigationView.getHeaderView(0);
-        ImageView navHeaderImage = navHeaderView.findViewById(R.id.userImageView);
+        CircleImageView navHeaderImage = navHeaderView.findViewById(R.id.userImageView);
         TextView navHeaderName = navHeaderView.findViewById(R.id.userTextViewName);
 
 
@@ -304,9 +556,10 @@ public class PassengerMapActivity extends AppCompatActivity implements OnMapRead
                     String passengerName = dataSnapshot.child("name").getValue(String.class);
                     String phoneNumber = dataSnapshot.child("phone").getValue(String.class);
                     String gender = dataSnapshot.child("gender").getValue(String.class);
+                    String imgUrl = dataSnapshot.child("imgUrl").getValue(String.class);
 
                     // Create request pickup data
-                    RequestPickupData requestPickupData = new RequestPickupData(currentBusId, getCurrentUserId(), passengerName, phoneNumber, gender);
+                    RequestPickupData requestPickupData = new RequestPickupData(currentBusId, getCurrentUserId(), passengerName, phoneNumber, gender,imgUrl);
 
                     // Save request pickup data to the real-time database
                     mDatabase.child("requestPickups").child(currentBusId).child("REQ-"+getCurrentUserId()).setValue(requestPickupData)
@@ -481,13 +734,12 @@ private void getDriverMarkers(){
     });
 
     mMap.moveCamera(CameraUpdateFactory.newLatLng(driverLatLng));
-    mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+    mMap.animateCamera(CameraUpdateFactory.zoomTo(17));
 
 }
     private void getDriverDirection() {
         //System.out.println("current driver uid : "+currentBusUID);
         DatabaseReference driverRouteRef = mDatabase.child("direction").child(currentBusUID);
-
 
             driverRouteRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -572,9 +824,12 @@ private void getDriverMarkers(){
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        }
+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+            }
+
+
     }
 
     @Override
@@ -587,39 +842,42 @@ private void getDriverMarkers(){
 
     @Override
     public void onLocationChanged(Location location) {
-        mLastLocation = location;
-        if (mLastLocation != null) {
-            double latitude = mLastLocation.getLatitude();
-            double longitude = mLastLocation.getLongitude();
 
-            // Update the current location of the passenger in Firebase Realtime Database
-//            mDatabase.child("locations").child("passengers").child(getCurrentUserId()).setValue(new LatLng(latitude, longitude));
-//            // Move the marker to the updated location
-//            LatLng passengerLatLng = new LatLng(latitude, longitude);
-//            if (passengerMarker != null) {
-//                passengerMarker.setPosition(passengerLatLng);
-//            } else {
-//                passengerMarker = mMap.addMarker(new MarkerOptions()
-//                        .position(passengerLatLng)
-//                        .title("Passenger Location")
-//                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-//            }
+            mLastLocation = location;
+            if (mLastLocation != null) {
+                double latitude = mLastLocation.getLatitude();
+                double longitude = mLastLocation.getLongitude();
 
-            // Update the camera position to focus on the passenger's location
-            //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(passengerLatLng, 15));
-        }
+                //Update the current location of the passenger in Firebase Realtime Database
+                mDatabase.child("locations").child("passengers").child(getCurrentUserId()).setValue(new LatLng(latitude, longitude));
+                // Update the camera position to focus on the passenger's location
+                //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(passengerLatLng, 15));
+            }
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            enableMyLocation();
 
-        }else {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+    mMap = googleMap;
+
+        if(Objects.equals(menuMap, "MAP_TYPE_NORMAL")){
+            mMap.setMapType(googleMap.MAP_TYPE_NORMAL);
+        }else if (Objects.equals(menuMap, "MAP_TYPE_TERRAIN")){
+            mMap.setMapType(googleMap.MAP_TYPE_TERRAIN);
+        }else if (Objects.equals(menuMap, "MAP_TYPE_SATELLITE")){
+            mMap.setMapType(googleMap.MAP_TYPE_SATELLITE);
+        }else if (Objects.equals(menuMap, "MAP_TYPE_NONE")){
+            mMap.setMapType(googleMap.MAP_TYPE_NONE);
+        }else if (Objects.equals(menuMap, "MAP_TYPE_HYBRID")){
+            mMap.setMapType(googleMap.MAP_TYPE_HYBRID);
         }
+
+    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        enableMyLocation();
+
+    }else {
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+    }
 
     }
     private void enableMyLocation() {
@@ -631,8 +889,13 @@ private void getDriverMarkers(){
                 if (location != null) {
                     currentLocation = location;
                     LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-                    addMarkerForLocation(latLng);
+                    if (requestPickupButton.getText()=="CANCEL"){
+                        //do nothing
+                    }else {
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+                        addMarkerForLocation(latLng);
+                    }
+
                 }
             });
         } else {
@@ -717,4 +980,319 @@ private void getDriverMarkers(){
         }
         return super.onOptionsItemSelected(item);
     }
+
+    //profile
+    private void startDataUpdates() {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // Generate or retrieve the updated data
+                String newData = generateNewData();
+
+                showInfo();
+
+                // Repeat the process after 1 second
+                startDataUpdates();
+            }
+        }, 1000); // 1 second delay
+    }
+
+    private String generateNewData() {
+        // Replace this method with your own logic to generate or retrieve the updated data
+        // For this example, we will return a simple timestamp
+        return String.valueOf(System.currentTimeMillis());
+    }
+
+    private void showInfo(){
+        DatabaseReference databaseReferenceUsername = firebaseDatabase.getReference("users");
+        databaseReferenceUsername.child("passengers").child(currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()){
+                    String username = snapshot.child("uname").getValue(String.class);
+                    getInfoPassenger(username);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+    private void getInfoPassenger(String uname){
+
+        DatabaseReference databaseReference = firebaseDatabase.getReference("passengers");
+        // Retrieve the passenger's profile data
+        databaseReference.child(uname).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // Retrieve the profile data from the dataSnapshot
+                    String email = dataSnapshot.child("email").getValue(String.class);
+                    String name = dataSnapshot.child("name").getValue(String.class);
+                    usernamePassenger = dataSnapshot.child("uname").getValue(String.class);
+                    String phone = dataSnapshot.child("phone").getValue(String.class);
+                    String password = dataSnapshot.child("password").getValue(String.class);
+                    String gender = dataSnapshot.child("gender").getValue(String.class);
+                    // Update the UI with the retrieved data
+                    genderTextView.setText(gender);
+                    emailTextView.setText(email);
+                    nameTextView.setText(name);
+                    usernameTextView.setText(usernamePassenger);
+                    phoneTextView.setText(phone);
+                    passwordTextView.setText(password);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle the error
+                Log.e("Database Error", databaseError.getMessage());
+            }
+        });
+    }
+
+    private void setProfileImage() {
+        if (currentUser.getPhotoUrl() != null) {
+            // Load user's profile image using FirebaseUser's photo URL
+            // You can use your own method or library for loading the image
+            // Here, we use Glide library as an example
+            Glide.with(this)
+                    .load(currentUser.getPhotoUrl())
+                    .placeholder(R.drawable.default_profile_image) // Placeholder image if the user has not uploaded their image
+                    .into(profileImageView);
+        } else {
+            // Set a placeholder image if the user has not uploaded their image
+            profileImageView.setImageResource(R.drawable.default_profile_image);
+        }
+    }
+
+
+    private void selectImage() {
+        // Create an AlertDialog to let the user choose between taking a photo or selecting from gallery
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Select Image");
+        builder.setItems(new CharSequence[]{"Take Photo", "Choose from Gallery"}, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == 0) {
+                    takePhoto();
+                } else {
+                    chooseFromGallery();
+                }
+            }
+        });
+        builder.show();
+    }
+
+    private void takePhoto() {
+        Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePhotoIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePhotoIntent, REQUEST_IMAGE_CAPTURE);
+        }
+    }
+
+    private void chooseFromGallery() {
+        Intent pickPhotoIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        pickPhotoIntent.setType("image/*");
+        startActivityForResult(pickPhotoIntent, REQUEST_IMAGE_PICK);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                Bundle extras = data.getExtras();
+                if (extras != null) {
+                    Bitmap imageBitmap = (Bitmap) extras.get("data");
+                    if (imageBitmap != null) {
+                        selectedImageUri = getImageUri(imageBitmap);
+                        uploadProfileImage();
+                    }
+                }
+            } else if (requestCode == REQUEST_IMAGE_PICK) {
+                if (data != null) {
+                    selectedImageUri = data.getData();
+                    uploadProfileImage();
+                }
+            }
+        }
+    }
+
+    private Uri getImageUri(Bitmap bitmap) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "Profile Image", null);
+        return Uri.parse(path);
+    }
+
+    private void uploadProfileImage() {
+        if (selectedImageUri != null) {
+            // Set the selected image URI as the profile photo for the current user
+            StorageReference storageRef = FirebaseStorage.getInstance().getReference().child("profile_images/" + currentUser.getUid() + ".jpg");
+            UploadTask uploadTask = storageRef.putFile(selectedImageUri);
+
+            Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+
+                    // Continue with the task to get the download URL
+                    return storageRef.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if (task.isSuccessful()) {
+                        Uri downloadUri = task.getResult();
+
+                        // Update the profile image URL for the current user
+                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                .setPhotoUri(downloadUri)
+                                .build();
+
+                        currentUser.updateProfile(profileUpdates)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            // Set the profile image
+                                            saveImageToFirebase(downloadUri);
+                                            setProfileImage();
+                                            Toast.makeText(PassengerMapActivity.this, "Profile image uploaded", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Toast.makeText(PassengerMapActivity.this, "Failed to upload profile image", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
+                    } else {
+                        Toast.makeText(PassengerMapActivity.this, "Failed to upload profile image", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+    }
+
+    private void saveImageToFirebase(Uri downloadUri) {
+        DatabaseReference adminRef = FirebaseDatabase.getInstance().getReference("passengers").child(usernamePassenger);
+        adminRef.child("imgUrl").setValue(downloadUri.toString());
+    }
+
+    private void showEditDialog() {
+        // Create a dialog builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Edit Profile");
+
+        // Inflate the dialog layout view
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_edit_profile, null);
+        builder.setView(dialogView);
+
+        // Initialize EditText fields and set their initial values
+        EditText nameEditText = dialogView.findViewById(R.id.editNameEditText);
+        EditText emailEditText = dialogView.findViewById(R.id.editEmailEditText);
+        EditText phoneEditText = dialogView.findViewById(R.id.editPhoneEditText);
+        EditText passwordEditText = dialogView.findViewById(R.id.editPasswordEditText);
+
+        // Set the current user information
+        nameEditText.setText("");
+        emailEditText.setText(currentUser.getEmail());
+        phoneEditText.setText(""); // Set the phone number as desired
+        passwordEditText.setText(""); // Set the password as desired
+
+        // Disable editing for email and username
+        emailEditText.setEnabled(false);
+        emailEditText.setFocusable(false);
+        emailEditText.setClickable(false);
+
+        // Create a button for saving the changes
+        builder.setPositiveButton("Save", (dialog, which) -> {
+            // Retrieve the updated values
+            String name = nameEditText.getText().toString().trim();
+            String phone = phoneEditText.getText().toString().trim();
+            String password = passwordEditText.getText().toString().trim();
+
+            if (!phone.equals("")){
+                DatabaseReference databaseReferenceUsername = firebaseDatabase.getReference("users");
+                databaseReferenceUsername.child("passengers").child(currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()){
+                            String username = snapshot.child("uname").getValue(String.class);
+                            // Update the user's profile in the Realtime Database
+                            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("passengers").child(Objects.requireNonNull(username));
+
+                            userRef.child("phone").setValue(phone);
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
+            if (!password.equals("")){
+                DatabaseReference databaseReferenceUsername = firebaseDatabase.getReference("users");
+                databaseReferenceUsername.child("passengers").child(currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()){
+                            String username = snapshot.child("uname").getValue(String.class);
+                            // Update the user's profile in the Realtime Database
+                            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("passengers").child(Objects.requireNonNull(username));
+
+                            userRef.child("password").setValue(password);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
+            if (!name.equals("")){
+                DatabaseReference databaseReferenceUsername = firebaseDatabase.getReference("users");
+                databaseReferenceUsername.child("passengers").child(currentUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()){
+                            String username = snapshot.child("uname").getValue(String.class);
+                            // Update the user's profile in the Realtime Database
+                            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("passengers").child(Objects.requireNonNull(username));
+
+                            userRef.child("name").setValue(name);
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
+
+
+            // Show a toast message to indicate successful update
+            Toast.makeText(PassengerMapActivity.this, "Profile updated successfully", Toast.LENGTH_SHORT).show();
+        });
+
+        // Create a button for canceling the changes
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            // Dismiss the dialog
+            dialog.dismiss();
+        });
+
+        // Show the dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
 }

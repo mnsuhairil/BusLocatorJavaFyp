@@ -350,7 +350,13 @@ public class DriverProfileActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     Toast.makeText(DriverProfileActivity.this, "Profile image uploaded successfully", Toast.LENGTH_SHORT).show();
-
+                    profileImageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            // Save the download URL to the Realtime Database under the driver's profile
+                            saveProfileImageUrlToDatabase(uri.toString());
+                        }
+                    });
                     // Load and display the updated profile image
                     loadProfileImage();
                 }
@@ -364,7 +370,46 @@ public class DriverProfileActivity extends AppCompatActivity {
             Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
         }
     }
+    private void saveProfileImageUrlToDatabase(String profileImageUrl) {
+        // Check if the current user is authenticated
+        if (currentUser != null) {
+            // Get the driver's unique ID
+            String driverId = currentUser.getUid();
+            String email = currentUser.getEmail();
+            String BusId = null;
+            // Find the index of the '@' symbol
+            int atIndex = email.indexOf('@');
 
+            if (atIndex != -1) {
+                // Extract the substring before the '@' symbol
+                BusId = email.substring(0, atIndex);
+
+                // Print the extracted username
+                System.out.println("Username: " + BusId);
+            } else {
+                // Handle the case when the email does not contain an '@' symbol
+                System.out.println("Invalid email format");
+            }
+
+            // Update the driver's profileImageUrl in the database
+            driverRef.child(BusId).child("imageUrl").setValue(profileImageUrl)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            // Profile image URL successfully saved in the database
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            // Failed to update profile image URL in the database
+                            Toast.makeText(DriverProfileActivity.this, "Failed to update profile image URL. Please try again.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        } else {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+        }
+    }
     public void onProfileImageClick(View view) {
         // Open the gallery to select an image
         Intent intent = new Intent();

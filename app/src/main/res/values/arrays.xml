@@ -5,4 +5,10 @@
         <item>Route 2</item>
         <item>Route 3</item>
     </array>
+
+    <string-array name="gender_options">
+        <item>Male</item>
+        <item>Female</item>
+    </string-array>
+
 </resources>

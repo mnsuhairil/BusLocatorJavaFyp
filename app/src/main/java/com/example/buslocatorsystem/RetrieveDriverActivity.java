@@ -43,7 +43,7 @@ import java.util.List;
 public class RetrieveDriverActivity extends AppCompatActivity {
 
     private RecyclerView recyclerViewDeletedDrivers;
-    private DeletedDriverAdapter deletedDriversAdapter;
+    private DeletedDriverAdapterRetrieved deletedDriversAdapter;
     private List<Driver> deletedDriversList;
     private DatabaseReference deletedDriversRef;
     private FirebaseAuth firebaseAuth;
@@ -73,7 +73,7 @@ public class RetrieveDriverActivity extends AppCompatActivity {
         deletedDriversList = new ArrayList<>();
 
         // Initialize deleted drivers adapter
-        deletedDriversAdapter = new DeletedDriverAdapter(this, deletedDriversList);
+        deletedDriversAdapter = new DeletedDriverAdapterRetrieved(this, deletedDriversList);
 
         // Set the adapter to the recycler view
         recyclerViewDeletedDrivers.setAdapter(deletedDriversAdapter);
@@ -120,27 +120,47 @@ public class RetrieveDriverActivity extends AppCompatActivity {
                 }
             }
 
+            // Define the fixed size for the icons using hardcoded values
+            int iconSizeInPixels = 150; // Set the size in pixels
+
             @Override
             public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
                 View itemView = viewHolder.itemView;
                 int backgroundCornerOffset = 20;
 
+                // Calculate the aspect ratio of the deleteIcon and retrieveIcon
+                int deleteIconWidth = deleteIcon.getIntrinsicWidth();
+                int deleteIconHeight = deleteIcon.getIntrinsicHeight();
+                float deleteIconAspectRatio = (float) deleteIconWidth / deleteIconHeight;
+
+                int retrieveIconWidth = retrieveIcon.getIntrinsicWidth();
+                int retrieveIconHeight = retrieveIcon.getIntrinsicHeight();
+                float retrieveIconAspectRatio = (float) retrieveIconWidth / retrieveIconHeight;
+
                 if (dX > 0) {
                     // Swiping to the right (retrieve)
-                    retrieveBackground.setBounds(itemView.getLeft(), itemView.getTop(), (int) dX, itemView.getBottom());
+                    retrieveBackground.setBounds(itemView.getLeft(), itemView.getTop(), (int) dX + 100, itemView.getBottom());
                     retrieveBackground.draw(c);
 
+                    // Calculate the fixed height for the retrieveIcon based on the fixed width and aspect ratio
+                    int retrieveIconFixedWidth = iconSizeInPixels;
+                    int retrieveIconFixedHeight = (int) (retrieveIconFixedWidth / retrieveIconAspectRatio);
+
                     retrieveIcon.setBounds(itemView.getLeft() + backgroundCornerOffset, itemView.getTop() + backgroundCornerOffset,
-                            itemView.getLeft() + backgroundCornerOffset + retrieveIcon.getIntrinsicWidth(),
-                            itemView.getBottom() - backgroundCornerOffset);
+                            itemView.getLeft() + backgroundCornerOffset + retrieveIconFixedWidth,
+                            itemView.getTop() + backgroundCornerOffset + retrieveIconFixedHeight);
                     retrieveIcon.draw(c);
                 } else if (dX < 0) {
                     // Swiping to the left (delete)
-                    deleteBackground.setBounds(itemView.getRight() + (int) dX, itemView.getTop(), itemView.getRight(), itemView.getBottom());
+                    deleteBackground.setBounds(itemView.getRight() + ((int) dX - 100), itemView.getTop(), itemView.getRight(), itemView.getBottom());
                     deleteBackground.draw(c);
 
-                    deleteIcon.setBounds(itemView.getRight() - backgroundCornerOffset - deleteIcon.getIntrinsicWidth(), itemView.getTop() + backgroundCornerOffset,
-                            itemView.getRight() - backgroundCornerOffset, itemView.getBottom() - backgroundCornerOffset);
+                    // Calculate the fixed height for the deleteIcon based on the fixed width and aspect ratio
+                    int deleteIconFixedWidth = iconSizeInPixels;
+                    int deleteIconFixedHeight = (int) (deleteIconFixedWidth / deleteIconAspectRatio);
+
+                    deleteIcon.setBounds(itemView.getRight() - backgroundCornerOffset - deleteIconFixedWidth, itemView.getTop() + backgroundCornerOffset,
+                            itemView.getRight() - backgroundCornerOffset, itemView.getTop() + backgroundCornerOffset + deleteIconFixedHeight);
                     deleteIcon.draw(c);
                 }
 
@@ -149,10 +169,13 @@ public class RetrieveDriverActivity extends AppCompatActivity {
         };
 
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerViewDeletedDrivers);
-        deleteIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_delete, null);
+        // Define the fixed size for the icons using hardcoded values
+
+        deleteIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.delete, null);
         deleteBackground = new ColorDrawable(Color.RED);
-        retrieveIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_retrieve, null);
+        retrieveIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.retrieve, null);
         retrieveBackground = new ColorDrawable(Color.GREEN);
+
     }
 
     private void retrieveAllDeletedDrivers() {

@@ -8,7 +8,23 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="your_color">#FF0000</color>
+    <color name="colorPrimary">#FF03DAC5</color>
+    <color name="colorPrimaryDark">#0099ff</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="transparent">#00FFFFFF</color>
 
-    <color name="colorPrimary">#28DAEA</color>
+    <!--//dashboard-->
+    <color name = "bgcolor">#474D71</color>
+    <color name = "textcolor">#FDFCFF</color>
+    <color name = "subtextcolor">#B7EEEEEE</color>
+    <color name = "btnstart">#7B7EA4</color>
+    <color name = "btnend">#575C84</color>
+    <color name = "cardstart">#93B7D7</color>
+    <color name = "cardend">#474D71</color>
+
+    <color name="background_color">#F1F1F1</color>
+    <color name="primary_color">#FF5722</color>
+
+
     <color name="bottom_navigation_background">#21AAA6</color> <!-- Set the desired background color -->
 </resources>

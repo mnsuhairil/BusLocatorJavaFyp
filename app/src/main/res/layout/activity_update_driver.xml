@@ -8,6 +8,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayoutDriverId"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:background="@drawable/round_border"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
@@ -17,6 +18,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editTextDriverId"
             android:layout_width="match_parent"
+            android:background="@color/transparent"
             android:layout_height="wrap_content"
             android:inputType="text" />
 
@@ -30,53 +32,51 @@
         android:layout_gravity="center"
         android:layout_marginBottom="16dp"
         android:text="Search Driver" />
+    <!-- Add this Spinner for selecting sorting criteria below the "Search Driver" button -->
+    <Spinner
+        android:id="@+id/spinnerSortingCriteria"
+        android:layout_width="100dp"
+        android:layout_height="35dp"
+        android:textAlignment="center"
+        android:background="@drawable/round_bg"
+        android:layout_gravity="center"
+        android:entries="@array/sorting_criteria_array" />
 
-    <TextView
-        android:layout_width="match_parent"
+    <!-- Add this RadioGroup for selecting sorting order -->
+    <RadioGroup
+        android:id="@+id/radioGroupSortingOrder"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:text="First Route"
-        android:textAppearance="?android:textAppearanceMedium"
-        android:textColor="@android:color/black" />
+        android:layout_gravity="center"
+        android:orientation="horizontal">
 
-    <ListView
-        android:id="@+id/listViewFirstRoute"
+        <RadioButton
+            android:id="@+id/radioButtonAscending"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ascending" />
+
+        <RadioButton
+            android:id="@+id/radioButtonDescending"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Descending" />
+    </RadioGroup>
+    <!-- activity_update_driver.xml -->
+
+
+    <!-- Add the "Sort" button -->
+    <Button
+        android:id="@+id/btnSortDrivers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:text="Sort" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewDrivers"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:text="Second Route"
-        android:textAppearance="?android:textAppearanceMedium"
-        android:textColor="@android:color/black" />
-
-    <ListView
-        android:id="@+id/listViewSecondRoute"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:text="Third Route"
-        android:textAppearance="?android:textAppearanceMedium"
-        android:textColor="@android:color/black" />
-
-    <ListView
-        android:id="@+id/listViewThirdRoute"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp" />
+        android:layout_weight="1" />
 
 </LinearLayout>

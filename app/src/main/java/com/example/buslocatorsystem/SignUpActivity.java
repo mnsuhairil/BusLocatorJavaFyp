@@ -1,11 +1,17 @@
 package com.example.buslocatorsystem;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,9 +32,11 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText mPhoneField;
     private EditText mPasswordField;
     private EditText mConfirmPasswordField;
+    private TextView buttonLogin;
     private EditText mUserNameField;
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
+    private String selectedGender = "Male";
 
 
     @Override
@@ -45,6 +53,42 @@ public class SignUpActivity extends AppCompatActivity {
         mPasswordField = findViewById(R.id.editTextPassword);
         mConfirmPasswordField = findViewById(R.id.editTextConfirmPassword);
         mUserNameField = findViewById(R.id.editTextUserNames);
+        buttonLogin = findViewById(R.id.button_login);
+
+        ScrollView scroll = findViewById(R.id.scroll);
+
+        // Find the Spinner and set up its adapter
+        Spinner spinnerGender = findViewById(R.id.spinnerGender);
+        ArrayAdapter<CharSequence> genderAdapter = ArrayAdapter.createFromResource(
+                this,
+                R.array.gender_options,
+                android.R.layout.simple_spinner_item
+        );
+        genderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerGender.setAdapter(genderAdapter);
+
+        // Handle item selection in the spinner
+        spinnerGender.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedGender = parent.getItemAtPosition(position).toString();
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                selectedGender = "Male";
+            }
+        });
+
+        buttonLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent intent = new Intent(SignUpActivity.this,TransitionActivity.class);
+                intent.putExtra("from","signup");
+                intent.putExtra("scroll",scroll.getScrollY());
+                startActivity(intent);
+            }
+        });
 
         Button signUpButton = findViewById(R.id.buttonSignUp);
         signUpButton.setOnClickListener(new View.OnClickListener() {
@@ -56,13 +100,13 @@ public class SignUpActivity extends AppCompatActivity {
                         mEmailField.getText().toString(),
                         mPhoneField.getText().toString(),
                         mPasswordField.getText().toString(),
-                        mConfirmPasswordField.getText().toString()
+                        mConfirmPasswordField.getText().toString(),selectedGender
                 );
             }
         });
     }
 
-    private void signUp(String uname, String name, String email, String phone, String password, String confirmPassword) {
+    private void signUp(String uname, String name, String email, String phone, String password, String confirmPassword,String gender) {
         if (TextUtils.isEmpty(uname)) {
             Toast.makeText(this, "Please enter your user name.", Toast.LENGTH_SHORT).show();
             return;
@@ -104,7 +148,7 @@ public class SignUpActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             FirebaseUser user = mAuth.getCurrentUser();
-                            savePassengerInfo(uname,user.getUid(), name, email, phone, password);
+                            savePassengerInfo(uname,user.getUid(), name, email, phone, password,gender);
                             Toast.makeText(SignUpActivity.this, "Sign up successful.", Toast.LENGTH_SHORT).show();
                             finish();
                         } else {
@@ -114,11 +158,12 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 
-    private void savePassengerInfo(String uname, String userId, String name, String email, String phone, String password) {
+    private void savePassengerInfo(String uname, String userId, String name, String email, String phone, String password,String gender) {
         String userType = "passenger";
-        Passenger passenger = new Passenger(uname,userId, name, email, phone, password, userType);
+        Passenger passenger = new Passenger(uname,userId, name, email, phone, password, userType,gender);
 
         mDatabase.child("passengers").child(uname).setValue(passenger);
         mDatabase.child("users").child("passengers").child(userId).child("uname").setValue(passenger.getUname());
+
     }
 }
