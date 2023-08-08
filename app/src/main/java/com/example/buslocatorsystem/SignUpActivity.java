@@ -88,6 +88,7 @@ public class SignUpActivity extends AppCompatActivity {
                 intent.putExtra("from","signup");
                 intent.putExtra("scroll",scroll.getScrollY());
                 startActivity(intent);
+                finish();
             }
         });
 

@@ -1478,7 +1478,6 @@ public class DriverActivity extends AppCompatActivity implements SensorEventList
     private void logoutDriver() {
         // Sign out the current user
         FirebaseAuth.getInstance().signOut();
-
         // Redirect to the LoginActivity
         Intent intent = new Intent(DriverActivity.this, SignInActivity.class);
         startActivity(intent);

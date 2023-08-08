@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +28,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.Objects;
 
 public class SignInActivity extends AppCompatActivity {
     private EditText mEmailOrUsernameField;
@@ -58,6 +61,16 @@ public class SignInActivity extends AppCompatActivity {
         mSignInButton = findViewById(R.id.buttonSignIn);
         mSignUpButton = findViewById(R.id.buttonSignUp);
 
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            // User is already authenticated, redirect to appropriate activity
+            ProgressBar progressBar = findViewById(R.id.progressBar);
+            progressBar.setVisibility(View.VISIBLE);
+
+            redirectToAppropriateActivity(currentUser);
+            return;
+        }
         mSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -72,6 +85,91 @@ public class SignInActivity extends AppCompatActivity {
             }
         });
     }
+    String uname;
+    private void redirectToAppropriateActivity(FirebaseUser user) {
+        String userId = user.getUid();
+
+        if (userType == null){
+            // Add your logic to determine the user type based on their ID or other criteria
+            // For example, you can check the database to see if the user is an admin, driver, or passenger
+
+            mDatabase.child("users").child("passengers").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        uname = snapshot.child("uname").getValue(String.class);
+                        Log.w("debug ",""+uname);
+                        mDatabase.child("passengers").child(uname).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.exists()) {
+                                    userType = snapshot.child("userType").getValue(String.class);
+                                    autoLogin();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+                    }
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+            mDatabase.child("users").child("drivers").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        uname = snapshot.child("busId").getValue(String.class);
+                        mDatabase.child("drivers").child(uname).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.exists()) {
+                                    userType = snapshot.child("userType").getValue(String.class);
+                                    autoLogin();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+                    }
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
+
+    }
+
+    private void autoLogin(){
+        ProgressBar progressBar = findViewById(R.id.progressBar);
+        progressBar.setVisibility(View.GONE);
+
+        // Once you determine the user type, redirect them to the appropriate activity
+        switch (userType) {
+            case "admin":
+                startActivity(new Intent(SignInActivity.this, AdminPanelActivity.class));
+                break;
+            case "driver":
+                startActivity(new Intent(SignInActivity.this, DriverActivity.class));
+                break;
+            case "passenger":
+                startActivity(new Intent(SignInActivity.this, PassengerMapActivity.class));
+                break;
+        }
+
+        finish(); // Close the SignInActivity
+    }
+
 
     private void signIn() {
         String emailorusername = mEmailOrUsernameField.getText().toString().trim();
@@ -185,7 +283,7 @@ public class SignInActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                             //redirectToUserActivity(user);
                             startActivity(new Intent(SignInActivity.this, DriverActivity.class));
-                            
+                            finish();
                         }
                     }
                 });
@@ -215,6 +313,7 @@ public class SignInActivity extends AppCompatActivity {
         Intent intent = new Intent(SignInActivity.this, TransitionActivity.class);
         intent.putExtra("from","signin");
         startActivity(intent);
+        finish();
     }
 
 }

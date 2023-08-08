@@ -295,6 +295,7 @@ public class BusStopFinderActivity extends AppCompatActivity implements SensorEv
         Intent intent = new Intent(this, PassengerMapActivity.class);
         intent.putExtra("mapFinder",menuMap);
         startActivity(intent);
+        finish();
     }
 
     @Override

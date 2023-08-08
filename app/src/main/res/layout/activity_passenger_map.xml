@@ -73,6 +73,40 @@ android:layout_height="match_parent">
                     android:text="REQUEST PICKUP"
                     android:layout_gravity="center|bottom"
                     android:layout_marginBottom="80dp"/>
+                <LinearLayout
+                    android:id="@+id/ETA"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/round_bg"
+                    android:visibility="gone"
+                    android:layout_marginVertical="10dp"
+                    android:layout_marginStart="60dp"
+                    android:layout_marginEnd="60dp"
+                    android:orientation="horizontal">
+
+                    <com.airbnb.lottie.LottieAnimationView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="20dp"
+                        android:visibility="visible"
+                        app:lottie_autoPlay="true"
+                        app:lottie_rawRes="@raw/time"
+                        app:lottie_loop="true"
+                        app:lottie_scale="0.5"
+                        app:lottie_speed="1.0" />
+                    <TextView
+                        android:id="@+id/estimated_time_textview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:textColor="@android:color/white"
+                        android:padding="8dp"
+                        android:textStyle="bold"
+                        android:gravity="center_horizontal"
+                        android:layout_marginEnd="30dp"
+                        android:text="Estimated Time: N/A" />
+                </LinearLayout>
 
             </FrameLayout>
 

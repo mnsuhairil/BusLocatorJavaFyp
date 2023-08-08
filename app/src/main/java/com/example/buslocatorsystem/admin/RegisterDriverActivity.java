@@ -110,6 +110,7 @@ public class RegisterDriverActivity extends AppCompatActivity {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             if (task.isSuccessful()) {
+                                                driversRef.child(driver.getBusId()).child("userType").setValue("driver");
                                                 Toast.makeText(RegisterDriverActivity.this, "Driver registered successfully", Toast.LENGTH_SHORT).show();
                                                 clearFields();
                                             } else {

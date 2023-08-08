@@ -20,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -71,6 +72,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.google.maps.DirectionsApi;
+import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
 
 
@@ -87,6 +90,7 @@ import android.app.AlertDialog;
 
 
 import com.example.buslocatorsystem.R;
+import com.google.maps.model.DirectionsResult;
 
 public class PassengerMapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
@@ -136,6 +140,7 @@ public class PassengerMapActivity extends AppCompatActivity implements OnMapRead
     private String menuMap;
     private String usernamePassenger;
     private TextView genderTextView;
+    private boolean isLogout=false;
 
 
     @Override
@@ -626,6 +631,35 @@ private void getDriverMarkers(){
                 .icon(busIcon));
     }
 
+    // Calculate ETA using Google Maps Directions API
+    LatLng userLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()); // Replace with user's current location
+    String apiKey = "AIzaSyCuBp-Fnefr1Xe5RxLgxMh3D2OzOQzxyaE"; // Replace with your actual API key
+
+    GeoApiContext geoApiContext = new GeoApiContext.Builder()
+            .apiKey(apiKey)
+            .build();
+
+    DirectionsApiRequest request = DirectionsApi.newRequest(geoApiContext)
+            .origin(driverLatLng.latitude + "," + driverLatLng.longitude)
+            .destination(userLatLng.latitude + "," + userLatLng.longitude);
+
+    try {
+        DirectionsResult result = request.await();
+
+        if (result.routes != null && result.routes.length > 0 &&
+                result.routes[0].legs != null && result.routes[0].legs.length > 0) {
+            String etaText = result.routes[0].legs[0].duration.humanReadable;
+            // Now you can display the ETA somewhere in your UI
+            // For example, you can use a TextView to display the ETA
+            TextView etaTextView = findViewById(R.id.estimated_time_textview);
+            LinearLayout ETA = findViewById(R.id.ETA);
+            etaTextView.setText("ETA: " + etaText);
+            ETA.setVisibility(View.VISIBLE);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
     // Set an OnMarkerClickListener for the driver marker
     driverMarker.setTag(currentBusId); // Set the driver ID as the marker's tag
     mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
@@ -690,21 +724,25 @@ private void getDriverMarkers(){
 
 
     private void logout() {
+    isLogout = true;
         // Remove the requestPickup data from the database
-        DatabaseReference requestPickupRef = FirebaseDatabase.getInstance().getReference("requestPickups")
-                .child(currentBusId).child("REQ-" + getCurrentUserId());
-        requestPickupRef.removeValue()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        // RequestPickup data removed successfully
-                        Toast.makeText(PassengerMapActivity.this, "RequestPickup data removed", Toast.LENGTH_SHORT).show();
-                    } else {
-                        // Error occurred while removing RequestPickup data
-                        Toast.makeText(PassengerMapActivity.this, "Failed to remove RequestPickup data", Toast.LENGTH_SHORT).show();
-                    }
-                    // Perform logout operation
-                    performLogout();
-                });
+        if (currentBusId!=null){
+            DatabaseReference requestPickupRef = FirebaseDatabase.getInstance().getReference("requestPickups")
+                    .child(currentBusId).child("REQ-" + Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid());
+            requestPickupRef.removeValue()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            // RequestPickup data removed successfully
+                            Toast.makeText(PassengerMapActivity.this, "RequestPickup data removed", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // Error occurred while removing RequestPickup data
+                            Toast.makeText(PassengerMapActivity.this, "Failed to remove RequestPickup data", Toast.LENGTH_SHORT).show();
+                        }
+                        // Perform logout operation
+
+                    });
+        }else  performLogout();
+
     }
 
     private void performLogout() {
@@ -751,7 +789,7 @@ private void getDriverMarkers(){
     public void onLocationChanged(Location location) {
 
             mLastLocation = location;
-            if (mLastLocation != null) {
+            if (mLastLocation != null&!isLogout) {
                 double latitude = mLastLocation.getLatitude();
                 double longitude = mLastLocation.getLongitude();
 
