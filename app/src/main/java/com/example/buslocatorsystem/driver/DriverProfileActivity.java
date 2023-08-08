@@ -1,6 +1,5 @@
-package com.example.buslocatorsystem;
+package com.example.buslocatorsystem.driver;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -25,6 +24,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
+import com.example.buslocatorsystem.designmaterial.CurvedBottomNavigationViewBackground;
+import com.example.buslocatorsystem.constructor.Driver;
+import com.example.buslocatorsystem.R;
+import com.example.buslocatorsystem.SignInActivity;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;

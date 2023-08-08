@@ -1,4 +1,4 @@
-package com.example.buslocatorsystem;
+package com.example.buslocatorsystem.designmaterial;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -9,7 +9,9 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import com.airbnb.lottie.LottieAnimationView;
-import com.airbnb.lottie.LottieComposition;
+import com.example.buslocatorsystem.R;
+import com.example.buslocatorsystem.SignInActivity;
+import com.example.buslocatorsystem.SignUpActivity;
 
 public class TransitionActivity extends AppCompatActivity {
 

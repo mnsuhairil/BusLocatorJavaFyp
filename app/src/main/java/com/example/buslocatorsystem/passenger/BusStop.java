@@ -1,4 +1,4 @@
-package com.example.buslocatorsystem;
+package com.example.buslocatorsystem.passenger;
 
 class BusStop {
     private String name;

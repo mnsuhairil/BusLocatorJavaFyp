@@ -19,14 +19,14 @@
         android:theme="@style/Theme.BusLocatorSystem"
         tools:targetApi="31">
         <activity
-            android:name=".TransitionActivity"
+            android:name=".designmaterial.TransitionActivity"
             android:theme="@style/Theme.BusLocatorSystemNoActionBar"
             android:exported="false" />
         <activity
-            android:name=".BusStopFinderActivity"
+            android:name=".passenger.BusStopFinderActivity"
             android:exported="false" />
         <activity
-            android:name=".PassengerProfileActivity"
+            android:name=".passenger.PassengerProfileActivity"
             android:exported="false" /> <!-- Google Maps API Key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -35,7 +35,7 @@
             android:name="org.apache.http.legacy"
             android:required="false" /> <!-- MapView Activity -->
         <activity
-            android:name=".PassengerMapActivity"
+            android:name=".passenger.PassengerMapActivity"
             android:exported="false"
             android:label="@string/title_activity_passenger_map">
 
@@ -45,10 +45,10 @@
                 android:value="true" />
         </activity> <!-- Other Activities -->
         <activity
-            android:name=".DriverProfileActivity"
+            android:name=".driver.DriverProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".DriverMapsActivity"
+            android:name=".driver.DriverMapsActivity"
             android:exported="false"
             android:label="@string/title_activity_maps"
             android:theme="@style/Theme.BusLocatorSystemNoActionBar"/>
@@ -57,27 +57,27 @@
             android:exported="false"
             android:theme="@style/Theme.BusLocatorSystemNoActionBar" />
         <activity
-            android:name=".RetrieveDriverActivity"
+            android:name=".admin.RetrieveDriverActivity"
             android:exported="false"
             android:theme="@style/Theme.BusLocatorSystemNoActionBar" />
         <activity
-            android:name=".DeleteDriverActivity"
+            android:name=".admin.DeleteDriverActivity"
             android:exported="false"
             android:theme="@style/Theme.BusLocatorSystemNoActionBar" />
         <activity
-            android:name=".UpdateDriverActivity"
+            android:name=".admin.UpdateDriverActivity"
             android:exported="false"
             android:theme="@style/Theme.BusLocatorSystemNoActionBar" />
         <activity
-            android:name=".RegisterDriverActivity"
+            android:name=".admin.RegisterDriverActivity"
             android:exported="false"
             android:theme="@style/Theme.BusLocatorSystemNoActionBar" />
         <activity
-            android:name=".DriverActivity"
+            android:name=".driver.DriverActivity"
             android:theme="@style/Theme.BusLocatorSystemNoActionBar"
             android:exported="false" />
         <activity
-            android:name=".AdminPanelActivity"
+            android:name=".admin.AdminPanelActivity"
             android:exported="false"
             android:theme="@style/Theme.BusLocatorSystemNoActionBar" />
         <activity

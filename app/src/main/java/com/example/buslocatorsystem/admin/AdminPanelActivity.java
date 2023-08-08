@@ -1,4 +1,4 @@
-package com.example.buslocatorsystem;
+package com.example.buslocatorsystem.admin;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -12,7 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +22,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.bumptech.glide.Glide;
+import com.example.buslocatorsystem.R;
+import com.example.buslocatorsystem.SignInActivity;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -251,7 +252,7 @@ public class AdminPanelActivity extends AppCompatActivity {
                         return true;
                     case R.id.menu_logout:
                         // Handle the action for logging out
-                        Intent intent = new Intent(AdminPanelActivity.this,SignInActivity.class);
+                        Intent intent = new Intent(AdminPanelActivity.this, SignInActivity.class);
                         startActivity(intent);
                         finish();
                         return true;

@@ -6,12 +6,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.buslocatorsystem.admin.AdminPanelActivity;
+import com.example.buslocatorsystem.designmaterial.TransitionActivity;
+import com.example.buslocatorsystem.driver.DriverActivity;
+import com.example.buslocatorsystem.passenger.PassengerMapActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -83,7 +88,7 @@ public class SignInActivity extends AppCompatActivity {
         }
 
 
-        mDatabase.child("admins").child(emailorusername).addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabase.child("admins").child("admin").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -158,9 +163,9 @@ public class SignInActivity extends AppCompatActivity {
         }*/
 
         if (auserType != null) {
+            Log.w(" hye"," " +password);
             if (auserType.equals("admin")&&mPasswordField.getText().toString().equals(password)
-                    &&(mEmailOrUsernameField.getText().toString().equals(adminEmail)
-                    ||mEmailOrUsernameField.getText().toString().equals(username))){
+                    && mEmailOrUsernameField.getText().toString().equals(username)){
 
                 startActivity(new Intent(SignInActivity.this, AdminPanelActivity.class));
                 finish();
@@ -207,7 +212,7 @@ public class SignInActivity extends AppCompatActivity {
     }
     private void signUp() {
 
-        Intent intent = new Intent(SignInActivity.this,TransitionActivity.class);
+        Intent intent = new Intent(SignInActivity.this, TransitionActivity.class);
         intent.putExtra("from","signin");
         startActivity(intent);
     }

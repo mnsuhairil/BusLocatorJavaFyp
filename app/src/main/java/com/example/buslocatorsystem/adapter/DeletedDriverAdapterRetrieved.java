@@ -1,11 +1,10 @@
-package com.example.buslocatorsystem;
+package com.example.buslocatorsystem.adapter;
 
 import android.content.Context;
 import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,6 +14,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.buslocatorsystem.constructor.Driver;
+import com.example.buslocatorsystem.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -29,12 +30,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-public class DeletedDriverAdapter extends RecyclerView.Adapter<DeletedDriverAdapter.ViewHolder> {
+public class DeletedDriverAdapterRetrieved extends RecyclerView.Adapter<DeletedDriverAdapterRetrieved.ViewHolder> {
 
     private Context context;
     private List<Driver> deletedDriversList;
 
-    public DeletedDriverAdapter(Context context, List<Driver> deletedDriversList) {
+    public DeletedDriverAdapterRetrieved(Context context, List<Driver> deletedDriversList) {
         this.context = context;
         this.deletedDriversList = deletedDriversList;
     }
@@ -42,7 +43,7 @@ public class DeletedDriverAdapter extends RecyclerView.Adapter<DeletedDriverAdap
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_deleted_driver, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_deleted_driver_retrive, parent, false);
         return new ViewHolder(view);
     }
 

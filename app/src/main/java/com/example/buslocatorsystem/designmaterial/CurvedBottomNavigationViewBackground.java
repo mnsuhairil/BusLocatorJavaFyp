@@ -1,4 +1,4 @@
-package com.example.buslocatorsystem;
+package com.example.buslocatorsystem.designmaterial;
 
 import android.content.Context;
 import android.graphics.Canvas;

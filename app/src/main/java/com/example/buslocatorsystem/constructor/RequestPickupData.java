@@ -1,4 +1,4 @@
-package com.example.buslocatorsystem;
+package com.example.buslocatorsystem.constructor;
 
 public class RequestPickupData {
     private String imgUrl;

@@ -1,6 +1,5 @@
 package com.example.buslocatorsystem;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -17,6 +16,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.buslocatorsystem.designmaterial.TransitionActivity;
+import com.example.buslocatorsystem.passenger.Passenger;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -83,7 +84,7 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                Intent intent = new Intent(SignUpActivity.this,TransitionActivity.class);
+                Intent intent = new Intent(SignUpActivity.this, TransitionActivity.class);
                 intent.putExtra("from","signup");
                 intent.putExtra("scroll",scroll.getScrollY());
                 startActivity(intent);
